@@ -808,7 +808,7 @@ void main() {
 Des scènes avec dizaines de lumières dynamiques sans explosion de draw calls, ombres nettes sur directional, ambiance réaliste grâce à SSAO. Le bloom est prévu mais pas encore fully implémenté (juste un blur basique pour tests).
 
 G-Buffer visualization 
-![Albedo](image/Albedo.png)
+![Albedo](https://github.com/Trijeux/trijeux.github.io/blob/main/image/Albedo.png)
 ![Normals]()
 ![Positions]()
 ![Specular]()
