@@ -6,13 +6,14 @@ categories: Blog Post Graphic Engine
 ---
 ## 1. Introduction & Motivation
 
-Ce projet est né dans le cadre de mon cursus à la **SAE Institute de Genève** (2025-2026), où j'ai suivi le module de programmation graphique avancée. L'objectif ? Plonger au cœur du **pipeline de rendu moderne** en utilisant **OpenGL** pour comprendre de A à Z comment fonctionnent les moteurs 3D d'aujourd'hui.
+Ce projet est né dans le cadre de mon cursus à la **SAE Institute de Genève** (2025-2026), où j'ai suivi le module de programmation graphique. 
+L'objectif ? Plonger au cœur du **pipeline de rendu moderne** en utilisant **OpenGL** pour comprendre de A à Z comment fonctionnent les moteurs 3D d'aujourd'hui.
 
 **Pourquoi OpenGL ?**  
-C'est une API accessible, cross-platform, et qui force à comprendre les bases (shaders GLSL, gestion GPU, maths linéaires) sans les abstractions trop hautes de Vulkan ou DirectX. J'ai voulu aller au-delà d'un simple "hello triangle" : implémenter un vrai moteur avec **deferred rendering**, ombres dynamiques, PBR basique, instancing massif et effets screen-space.
+C'est une API accessible, cross-platform, et qui force à comprendre les bases (shaders GLSL, gestion GPU, maths linéaires) sans les abstractions trop hautes de Vulkan ou DirectX. J'ai voulu aller au-delà d'un simple "hello triangle" : implémenter un vrai moteur avec **deferred rendering**, ombres dynamiques, instancing massif et effets screen-space.
 
 **Quand et où ?**  
-Débuté en septembre 2025 à Genève, finalisé début 2026. Développé principalement sur Linux (Ubuntu) avec tests sur Windows. Environ 4-5 mois de travail intermittent, entre cours et nuits blanches.
+Débuté en septembre 2025 à Genève, finalisé début 2026. Développé principalement sur Windows avec tests sur Linux (Ubuntu). Environ 4-5 mois de travail intermittent, entre cours et nuits blanches.
 
 **Ce qui a été accompli**  
 Un moteur multiplateforme (Windows/Linux) capable de charger des modèles complexes, gérer des dizaines de lumières, appliquer SSAO, skybox, shadow mapping (directionnel + point lights), et instancier des milliers d'objets sans tuer les FPS.
@@ -25,15 +26,15 @@ Code source complet : [GitHub – Trijeux/Graphic-Engine](https://github.com/Tri
 Démo playable : [Itch.io – Graphic Engine](https://trijeuxaxel.itch.io/graphic-engine)
 
 **Stack technique**  
-- C++23  
-- CMake + vcpkg  
-- SDL3 (fenêtre & input)  
-- GLEW (extensions OpenGL)  
-- GLM (maths)  
-- ImGui (debug UI)  
-- Assimp (modèles)  
-- stb_image (textures)  
-- GPR924-Engine (base SAE interne)
+* **[C++ 23](https://en.cppreference.com/w/cpp/23.html) :** Pour bénéficier des dernières fonctionnalités du langage.
+* **[CMake](https://cmake.org) :** Pour la gestion de la compilation et la génération des fichiers de projet.
+* **[SDL3](https://wiki.libsdl.org/SDL3/FrontPage) :** Pour la gestion de la fenêtre, du contexte OpenGL et des entrées utilisateur.
+* **[OpenGL ES 3.0](https://www.khronos.org/opengles/) :** L'API graphique utilisée pour le rendu.
+* **[GLEW](https://glew.sourceforge.net) :** Pour le chargement des extensions OpenGL.
+* **[ImGui](https://github.com/ocornut/imgui) :** Pour la création d'une interface utilisateur de debug dynamique.
+* **[GLM](https://github.com/g-truc/glm) :** Une bibliothèque mathématique pour la manipulation des vecteurs et des matrices.
+* **[Assimp](https://github.com/assimp/assimp) :** Pour l'importation de modèles 3D complexes (formats .obj, .fbx, etc.).
+* **[GPR924-Engine](https://github.com/SAE-Geneve/GPR924-Engine) :** Une librairie interne développée par notre classe à la SAE, servant de base à l'architecture du moteur.
 
 ## 2. Architecture du Projet
 
@@ -60,7 +61,7 @@ Le moteur adopte une architecture **Deferred Rendering** (rendu différé), part
   - Albedo
   - Normales
   - Positions (world-space)
-  - Spéculaire / Roughness / autres propriétés PBR
+  - Spéculaire
 - **Lighting Pass** : Seconde passe en screen-space (`deferred.frag`, `generic_light.frag`) qui calcule l’éclairage + ombres à partir du G-Buffer. Cette séparation découple la complexité géométrique du nombre de lumières, permettant de gérer efficacement des dizaines de sources (point + directional).
 - **Fonctionnalités avancées** :
   - **Shadow mapping** directionnel (`shadow_map.h`) et omnidirectionnel pour les point lights (`point_shadow_map.h`).
@@ -83,7 +84,7 @@ Le moteur utilise des structures de données OpenGL modernes pour minimiser les 
   - Position (vec3)
   - Normales (vec3)
   - Coordonnées de texture (vec2)
-  - Tangentes / Bitangentes (pour normal mapping – probable dans deferred PBR)
+  - Tangentes / Bitangentes (pour normal mapping)
 - Support intensif de **l’instancing** via des classes dédiées :
   - `instancing_mesh.h` / `instancing_cube_mesh.h` : un seul mesh partagé par des milliers d’instances.
   - `instancing_model.h` : gestion des transformations par instance (matrice model via SSBO ou UBO).
@@ -98,18 +99,17 @@ Les modèles sont chargés via **Assimp** (Open Asset Import Library) pour suppo
 - Préparation immédiate des buffers GPU (VAO/VBO/EBO) lors du chargement.
 
 #### Gestion des Textures
-Les textures sont chargées depuis le dossier `data/` et associées aux matériaux PBR pour le G-Buffer :
+Les textures sont chargées depuis le dossier `data/` et associées aux G-Buffer :
 
 - Intégration de **stb_image** pour les formats PNG, JPG, HDR…
-- Textures typiques pour deferred PBR :
+- Textures typiques pour deferred:
   - Albedo / Base Color
   - Normal Map
-  - Roughness / Metallic / Specular
+  - Specular
   - Ambient Occlusion (optionnel)
-  - Emissive (pour les sources lumineuses auto-éclairées)
 - Gestion GPU :
   - Bind automatique sur les bonnes unités de texture.
-  - Paramètres : wrapping (repeat/clamp), filtrage (linear/mipmap), anisotropic filtering (si disponible).
+  - Paramètres : wrapping (repeat/clamp), filtrage (linear/mipmap).
   - Génération de mipmaps pour réduire l’aliasing sur les objets éloignés.
 
 Ce système permet de gérer des scènes avec des matériaux variés, des assets professionnels issus de Blender/Maya/Substance, et un grand nombre d’objets instanciés.
@@ -120,7 +120,7 @@ Le cœur visuel du moteur : un **éclairage dynamique** avec **deferred shading*
 
 **Comment ça a été fait**  
 1. **Geometry Pass** : Les modèles sont rendus dans le G-Buffer (4-5 render targets) → albedo (base color), normals (world-space), positions, metallic/roughness/specular. Shaders : `g_buffer.vert` + `g_buffer.frag`.  
-2. **Lighting Pass** : Un fullscreen quad sample le G-Buffer et calcule l'éclairage pour chaque lumière (Blinn-Phong ou mini-PBR). Shaders : `deferred.vert` + `generic_light.frag` / `point_light.frag`.  
+2. **Lighting Pass** : Un fullscreen quad sample le G-Buffer et calcule l'éclairage pour chaque lumière. Shaders : `deferred.vert` + `generic_light.frag` / `point_light.frag`.  
 3. **Types de lumières** : Directional (soleil avec shadow map cascade), Point (omni-shadow avec cubemap depth), Spot (si ajouté).  
 4. **Shadow Mapping** : Passe dédiée pour chaque lumière → depth map depuis la vue de la lumière, puis comparaison dans le lighting shader. Classes : `shadow_map.h`, `point_shadow_map.h`.  
 5. **SSAO** : Post-process screen-space : sample le depth + normals pour estimer l'occlusion ambiante, puis bilateral blur (`ssao.frag` + `ssao_blur.frag`).  
@@ -155,24 +155,11 @@ Ces problèmes m'ont forcé à penser optimisation dès le début – une excell
 Ce projet m'a appris énormément : le vrai coût du rendu moderne n'est pas dans la géométrie, mais dans l'éclairage et les post-effects. Passer à **deferred** a été le turning point pour scaler les lumières et effets.
 
 **Ce qui a été accompli**  
-- Deferred PBR-like avec G-Buffer  
+- Deferred + Bloom
+- G-Buffer  
 - Multi-lights + shadows (dir + point)  
 - Instancing massif  
 - SSAO + skybox  
 - Caméra FPS fluide + debug UI
 
-**Ce que j'aimerais ajouter**  
-- Full PBR (IBL, environment map reflection)  
-- Bloom + tonemapping HDR  
-- Screen-Space Reflections (SSR)  
-- Volumetric lights / god rays  
-- Peut-être une migration Vulkan un jour...
-
 Merci à la SAE Genève, aux profs, et à la communauté OpenGL pour les ressources !  
-
-N'hésite pas à cloner, tester, ou me poser des questions sur GitHub.  
-
-Code : [github.com/Trijeux/Graphic-Engine](https://github.com/Trijeux/Graphic-Engine)  
-Itch.io : [trijeuxaxel.itch.io/graphic-engine](https://trijeuxaxel.itch.io/graphic-engine)
-
-À bientôt pour la V2 ! 🚀
