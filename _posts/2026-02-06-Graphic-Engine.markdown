@@ -2,7 +2,8 @@
 layout: post
 title:  "Créer un moteur de rendu 3D avec OpenGL en c++"
 date:   2026-02-06 17:40:00 +0100
-categories: Blog Post Graphic Engine
+categories: Blog_Post Graphic_Engine
+hidden : false
 ---
 ## 1. Introduction & Motivation
 

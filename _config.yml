@@ -30,6 +30,7 @@ github_username:  Trijeux
 
 # Build settings
 theme: minima
+permalink: none
 plugins:
   - jekyll-feed
 
