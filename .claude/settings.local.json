@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la \"C:/Users/antho/Desktop/Jeux_en_dev/VirtualStudio/Site/my_site/image/\"*.gif)",
+      "Bash(ls -la \"C:/Users/antho/Desktop/Jeux_en_dev/VirtualStudio/Site/my_site/_site/image/\"*.gif)",
+      "Bash(python3 -c \":*)",
+      "Bash(powershell -Command \":*)"
+    ]
+  }
+}

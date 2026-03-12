@@ -114,4 +114,4 @@ Et restez connectés : les prochains articles détailleront le level design, la 
 
 À très vite !
 
-## [Sub Project](/blog_post/sub_project/Sub_Project.html) 15/02/2026
+## [Ui Battle](/blog_post/ui/battle/Ui-Battle.html) 12/03/2026

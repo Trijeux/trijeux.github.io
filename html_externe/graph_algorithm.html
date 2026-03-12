@@ -1,0 +1,1704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Graph Algorithm Visualizer</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;500;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#0a0e1a;color:#e0e8ff;font-family:'Rajdhani',sans-serif;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;padding:14px;
+  background-image:radial-gradient(ellipse at 20% 20%,rgba(0,200,255,.04) 0%,transparent 60%),
+    radial-gradient(ellipse at 80% 80%,rgba(80,0,255,.05) 0%,transparent 60%);}
+h1{font-family:'Share Tech Mono',monospace;font-size:1.1rem;letter-spacing:.2em;color:#00d4ff;
+  text-transform:uppercase;margin-bottom:2px;text-shadow:0 0 20px rgba(0,212,255,.5);}
+.subtitle{font-size:.78rem;color:#4a6080;letter-spacing:.08em;margin-bottom:10px;font-weight:300;}
+
+.tab-bar{display:flex;gap:0;margin-bottom:12px;border:1px solid #1a2a40;border-radius:7px;
+  overflow:hidden;flex-wrap:wrap;max-width:1100px;width:100%;}
+.tab-btn{font-family:'Share Tech Mono',monospace;font-size:.65rem;letter-spacing:.08em;
+  padding:8px 14px;border:none;background:#0d1220;color:#3a5a7a;cursor:pointer;
+  transition:all .18s;white-space:nowrap;flex:1;}
+.tab-btn:hover{color:#7ab3ff;background:#0f1e30;}
+.tab-btn.t-dijk {border-bottom:2px solid transparent;}
+.tab-btn.t-dijk.on{background:#001e38;color:#00d4ff;border-bottom-color:#00d4ff;}
+.tab-btn.t-ff.on{background:#160826;color:#cc88ff;border-bottom-color:#cc88ff;}
+.tab-btn.t-bfs.on{background:#002010;color:#00dd88;border-bottom-color:#00dd88;}
+.tab-btn.t-dfs.on{background:#1e1200;color:#ffaa22;border-bottom-color:#ffaa22;}
+.tab-btn.t-kru.on{background:#001828;color:#44ccff;border-bottom-color:#44ccff;}
+.tab-btn.t-pri.on{background:#0e1800;color:#88ff44;border-bottom-color:#88ff44;}
+.tab-btn.t-bfn.on{background:#200808;color:#ff6666;border-bottom-color:#ff6666;}
+.tab-btn.t-top.on{background:#1a0020;color:#dd88ff;border-bottom-color:#dd88ff;}
+
+.section{display:none;width:100%;max-width:1100px;flex-direction:column;align-items:center;}
+.section.on{display:flex;}
+
+.mode-bar{display:flex;gap:4px;margin-bottom:10px;background:#0d1220;border:1px solid #1a2a40;
+  border-radius:6px;padding:4px;flex-wrap:wrap;justify-content:center;}
+.mode-btn{font-family:'Share Tech Mono',monospace;font-size:.65rem;letter-spacing:.06em;
+  padding:4px 10px;border:1px solid transparent;border-radius:4px;
+  background:transparent;color:#3a5a7a;cursor:pointer;transition:all .15s;}
+.mode-btn:hover{color:#7ab3ff;border-color:#2a4a6a;}
+.mode-btn.on{background:#002a4a;border-color:#00d4ff;color:#00d4ff;}
+.mode-btn.edit-on{background:#1a2a00;border-color:#aadd00;color:#aadd00;}
+
+.layout{display:flex;gap:12px;align-items:flex-start;width:100%;flex-wrap:wrap;}
+canvas{background:#0d1220;border:1px solid #1a2a40;border-radius:8px;
+  box-shadow:0 0 30px rgba(0,100,200,.1);flex-shrink:0;display:block;}
+
+.panel{background:#0d1220;border:1px solid #1a2a40;border-radius:8px;
+  padding:12px;min-width:200px;flex-shrink:0;}
+.panel h2{font-family:'Share Tech Mono',monospace;font-size:.68rem;
+  letter-spacing:.14em;margin-bottom:8px;border-bottom:1px solid #1a2a40;padding-bottom:5px;}
+.h-dijk{color:#00d4ff;} .h-ff{color:#cc88ff;} .h-bfs{color:#00dd88;}
+.h-dfs{color:#ffaa22;} .h-kru{color:#44ccff;} .h-pri{color:#88ff44;}
+.h-bfn{color:#ff6666;} .h-top{color:#dd88ff;}
+
+.gen-table{width:100%;border-collapse:collapse;}
+.gen-table td{font-family:'Share Tech Mono',monospace;font-size:.73rem;padding:2px 4px;border-bottom:1px solid #111827;}
+.gen-table td:first-child{color:#7ab3ff;}
+.gen-table td:last-child{color:#f0f4ff;text-align:right;}
+.gen-table tr.cur td{color:#00d4ff;background:rgba(0,212,255,.07);}
+.gen-table tr.vis td{color:#2a5a2a;}
+.gen-table tr.vis td:first-child{color:#2a8a2a;}
+.gen-table tr.neg td{color:#ff4444;}
+
+button{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:.78rem;
+  letter-spacing:.06em;padding:5px 10px;border:1px solid #1a3a5a;
+  border-radius:4px;background:#0a1828;color:#7ab3ff;cursor:pointer;transition:all .15s;}
+button:hover{background:#0f2040;border-color:#00d4ff;color:#00d4ff;}
+button.pri{background:#002a4a;border-color:#00d4ff;color:#00d4ff;}
+button.danger{border-color:#4a1a1a;color:#aa4444;}
+button.danger:hover{background:#2a0a0a;border-color:#ff4444;color:#ff6666;}
+.controls{display:flex;gap:4px;margin-top:8px;flex-wrap:wrap;}
+
+.info{font-family:'Share Tech Mono',monospace;font-size:.66rem;color:#4a7a9a;
+  margin-top:7px;line-height:1.6;min-height:40px;}
+.info span{color:#00d4ff;} .info b{color:#ffcc44;}
+.info.c-ff span{color:#cc88ff;} .info.c-bfs span{color:#00dd88;}
+.info.c-dfs span{color:#ffaa22;} .info.c-kru span{color:#44ccff;}
+.info.c-pri span{color:#88ff44;} .info.c-bfn span{color:#ff6666;}
+.info.c-top span{color:#dd88ff;}
+
+.legend{display:flex;gap:9px;flex-wrap:wrap;margin-top:6px;}
+.legend-item{display:flex;align-items:center;gap:3px;font-size:.65rem;color:#4a6080;font-family:'Share Tech Mono',monospace;}
+.ldot{width:8px;height:8px;border-radius:50%;}
+
+.edit-hint{font-family:'Share Tech Mono',monospace;font-size:.61rem;color:#2a4a6a;line-height:1.75;}
+.edit-hint b{color:#5a8a6a;}
+.edit-section label{display:block;font-family:'Share Tech Mono',monospace;font-size:.63rem;color:#5a8aaa;margin-bottom:3px;}
+.edit-section input{width:100%;padding:3px 6px;background:#060c18;border:1px solid #1a3a5a;
+  border-radius:4px;color:#e0e8ff;font-family:'Share Tech Mono',monospace;font-size:.71rem;outline:none;}
+.edit-section input:focus{border-color:#00d4ff;}
+
+.popup{position:fixed;display:none;z-index:1000;background:#0d1828;
+  border-radius:6px;padding:11px 12px;min-width:168px;box-shadow:0 8px 32px rgba(0,0,0,.6);}
+.popup label{font-family:'Share Tech Mono',monospace;font-size:.64rem;color:#5a8aaa;display:block;margin-bottom:5px;}
+.popup input{width:100%;padding:4px 7px;background:#060c18;border:1px solid #1a3a5a;
+  border-radius:4px;color:#e0e8ff;font-family:'Share Tech Mono',monospace;font-size:.78rem;outline:none;margin-bottom:7px;}
+.popup .wp-btns{display:flex;gap:5px;}
+.popup .wp-btns button{flex:1;font-size:.71rem;padding:4px;}
+
+.ctx-menu{position:fixed;display:none;z-index:999;background:#0d1828;border:1px solid #1a3a5a;
+  border-radius:6px;padding:4px 0;min-width:145px;box-shadow:0 8px 32px rgba(0,0,0,.6);}
+.ctx-menu div{font-family:'Rajdhani',sans-serif;font-weight:600;font-size:.78rem;
+  padding:6px 12px;cursor:pointer;color:#7ab3ff;transition:background .1s;}
+.ctx-menu div:hover{background:#0f2040;color:#00d4ff;}
+.ctx-menu .sep{height:1px;background:#1a2a40;margin:2px 0;pointer-events:none;}
+.ctx-menu div.red{color:#aa4444;}
+.ctx-menu div.red:hover{background:#1a0808;color:#ff6666;}
+
+.flow-bar-wrap{margin-top:5px;}
+.flow-bar-label{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:#7a6a9a;margin-bottom:3px;}
+.flow-bar{height:9px;background:#1a0a2a;border-radius:5px;overflow:hidden;}
+.flow-bar-fill{height:100%;background:linear-gradient(90deg,#7700aa,#cc88ff);border-radius:5px;transition:width .3s;}
+</style>
+</head>
+<body>
+<h1>// Graph Algorithm Visualizer</h1>
+<div class="subtitle">7 algorithms — interactive editor on every tab</div>
+
+<div class="tab-bar">
+  <button class="tab-btn t-dijk on"  onclick="switchTab('dijk')">◎ DIJKSTRA</button>
+  <button class="tab-btn t-ff"       onclick="switchTab('ff')">⊳ FORD-FULKERSON</button>
+  <button class="tab-btn t-bfs"      onclick="switchTab('bfs')">⊞ BFS</button>
+  <button class="tab-btn t-dfs"      onclick="switchTab('dfs')">⊟ DFS</button>
+  <button class="tab-btn t-kru"      onclick="switchTab('kru')">⋈ KRUSKAL</button>
+  <button class="tab-btn t-pri"      onclick="switchTab('pri')">⊕ PRIM</button>
+  <button class="tab-btn t-bfn"      onclick="switchTab('bfn')">± BELLMAN-FORD</button>
+  <button class="tab-btn t-top"      onclick="switchTab('top')">↧ TOPO SORT</button>
+</div>
+
+<!-- Each section is generated by JS to keep HTML lean -->
+<div id="sec-dijk" class="section on"></div>
+<div id="sec-ff"   class="section"></div>
+<div id="sec-bfs"  class="section"></div>
+<div id="sec-dfs"  class="section"></div>
+<div id="sec-kru"  class="section"></div>
+<div id="sec-pri"  class="section"></div>
+<div id="sec-bfn"  class="section"></div>
+<div id="sec-top"  class="section"></div>
+
+<!-- Shared popups -->
+<div class="popup" id="wPop" style="border:1px solid #00d4ff;">
+  <label id="wPopLabel">WEIGHT</label>
+  <input id="wPopInput" type="number" min="-99" max="9999" value="1">
+  <div class="wp-btns"><button class="pri" onclick="wPopOK()">OK</button><button onclick="wPopCancel()">CANCEL</button></div>
+</div>
+<div class="ctx-menu" id="ctxMenu">
+  <div id="ctxSrc" onclick="ctxAction('src')">Set as Source</div>
+  <div id="ctxTgt" onclick="ctxAction('tgt')">Set as Target</div>
+  <div id="ctxSnk" onclick="ctxAction('snk')" style="display:none">Set as Sink</div>
+  <div class="sep"></div>
+  <div class="red" onclick="ctxAction('del')">Delete Node</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  SHARED UTILITIES
+// ═══════════════════════════════════════════════════════════════
+const NR = 20; // node radius
+const TABS = ['dijk','ff','bfs','dfs','kru','pri','bfn','top'];
+let activeTab = 'dijk';
+
+function switchTab(t){
+  TABS.forEach(id=>{
+    document.getElementById('sec-'+id).classList.toggle('on', id===t);
+    document.querySelector('.tab-btn.t-'+id).classList.toggle('on', id===t);
+  });
+  activeTab = t;
+  closeCtx();
+  redrawAll();
+}
+
+function redrawAll(){
+  const fns={dijk:dijkDraw,ff:ffDraw,bfs:bfsDraw,dfs:dfsDraw,kru:kruDraw,pri:priDraw,bfn:bfnDraw,top:topDraw};
+  if(fns[activeTab]) fns[activeTab]();
+}
+
+// ── Canvas / section builder ────────────────────────────────────
+function makeSection(id, accentColor, rightPanelHTML, legendItems, modeBarIds){
+  const sec = document.getElementById('sec-'+id);
+  const modesHTML = modeBarIds.map(([mid,label,isDefault])=>
+    `<button class="mode-btn${isDefault?' on':''}" id="mb-${id}-${mid}" onclick="${id}SetMode('${mid}')">${label}</button>`
+  ).join('');
+  sec.innerHTML = `
+    <div class="mode-bar">${modesHTML}</div>
+    <div class="layout">
+      <div>
+        <canvas id="cv-${id}" width="560" height="440"></canvas>
+        <div class="legend" id="leg-${id}">${legendItems}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;min-width:200px;">
+        ${rightPanelHTML}
+      </div>
+    </div>`;
+}
+
+function legendItem(color, border, label){
+  return `<div class="legend-item"><div class="ldot" style="background:${color};border:1.5px solid ${border}"></div>${label}</div>`;
+}
+
+// ── Shared graph editor helpers (one instance per tab) ──────────
+function makeEditor(cfg){
+  // cfg: {id, nodes, edges, directed, negWeights, onReset, colorAccent}
+  const cv = ()=>document.getElementById('cv-'+cfg.id);
+  const r = {};
+  r.mode = 'select';
+  r.hNode = null; r.hEdge = -1;
+  r.dragNode = null; r.dragOX = 0; r.dragOY = 0; r.wasDrag = false;
+  r.edgeFirst = null;
+  r.pendingEdge = null; r.editEdgeIdx = -1;
+  r.ctxNode = null;
+
+  r.setMode = function(m){
+    r.mode = m; r.edgeFirst = null; r.hEdge = -1;
+    document.querySelectorAll(`#sec-${cfg.id} .mode-btn`).forEach(b=>{
+      b.classList.remove('on','edit-on');
+    });
+    const btn = document.getElementById(`mb-${cfg.id}-${m}`);
+    if(btn) btn.classList.add(m==='select'?'on':'edit-on');
+    const cursors={select:'default',drag:'grab',addNode:'crosshair',addEdge:'crosshair',delete:'crosshair'};
+    cv().style.cursor = cursors[m]||'default';
+    document.getElementById(`add-node-sec-${cfg.id}`) && (document.getElementById(`add-node-sec-${cfg.id}`).style.display=m==='addNode'?'block':'none');
+    cfg.onDraw();
+  };
+
+  r.nodeAt = (mx,my)=> Object.keys(cfg.nodes).find(n=>Math.hypot(mx-cfg.nodes[n].x,my-cfg.nodes[n].y)<=NR+3)||null;
+  r.edgeAt = function(mx,my){
+    for(let i=0;i<cfg.edges.length;i++){
+      const e=cfg.edges[i]; const a=cfg.nodes[e.u],b=cfg.nodes[e.v]; if(!a||!b)continue;
+      let sx=a.x,sy=a.y,ex=b.x,ey=b.y;
+      if(cfg.directed){const dx=b.x-a.x,dy=b.y-a.y,l=Math.sqrt(dx*dx+dy*dy)||1;sx=a.x+dx/l*NR;sy=a.y+dy/l*NR;ex=b.x-dx/l*NR;ey=b.y-dy/l*NR;}
+      const dx=ex-sx,dy=ey-sy,l2=dx*dx+dy*dy; if(!l2)continue;
+      const t=Math.max(0,Math.min(1,((mx-sx)*dx+(my-sy)*dy)/l2));
+      if(Math.hypot(mx-(sx+t*dx),my-(sy+t*dy))<9)return i;
+    }return -1;
+  };
+
+  r.addNodeAt = function(x,y){
+    const used=new Set(Object.keys(cfg.nodes));
+    let l=''; const alpha='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    // Special handling for FF (prefer S,T)
+    const pool=cfg.labelPool||[...alpha].concat([...alpha].map(c=>c+'1'));
+    for(const c of pool){if(!used.has(c)){l=c;break;}}
+    const inp=document.getElementById(`new-node-${cfg.id}`);
+    const custom=inp?inp.value.trim().toUpperCase():'';
+    if(custom){ if(cfg.nodes[custom]){alert('Node "'+custom+'" exists.');return;} l=custom; if(inp)inp.value=''; }
+    if(!l)return;
+    cfg.nodes[l]={x:Math.round(x),y:Math.round(y)};
+    cfg.onReset(); cfg.onDraw();
+  };
+
+  r.deleteNode = function(n){
+    if(n===cfg.src||(cfg.src2&&n===cfg.src2)){alert('Cannot delete source/sink. Reassign first.');return;}
+    delete cfg.nodes[n];
+    cfg.edges = cfg.edges.filter(e=>e.u!==n&&e.v!==n);
+    cfg.onReset(); cfg.onDraw();
+  };
+
+  function attachEvents(){
+    const c = cv();
+    c.addEventListener('mousemove',e=>{
+      const rect=c.getBoundingClientRect(),mx=e.clientX-rect.left,my=e.clientY-rect.top;
+      const pN=r.hNode,pE=r.hEdge;
+      r.hNode=r.nodeAt(mx,my);
+      r.hEdge=(r.mode==='delete'&&!r.hNode)?r.edgeAt(mx,my):-1;
+      if(r.dragNode){
+        cfg.nodes[r.dragNode].x=Math.max(NR,Math.min(c.width-NR,mx+r.dragOX));
+        cfg.nodes[r.dragNode].y=Math.max(NR,Math.min(c.height-NR,my+r.dragOY));
+        r.wasDrag=true; cfg.onReset(); cfg.onDraw(); return;
+      }
+      if(r.hNode!==pN||r.hEdge!==pE) cfg.onDraw();
+    });
+    c.addEventListener('mousedown',e=>{
+      if(e.button!==0)return;
+      const rect=c.getBoundingClientRect(),n=r.nodeAt(e.clientX-rect.left,e.clientY-rect.top);
+      if(r.mode==='drag'&&n){r.dragNode=n;r.dragOX=cfg.nodes[n].x-(e.clientX-rect.left);r.dragOY=cfg.nodes[n].y-(e.clientY-rect.top);r.wasDrag=false;c.style.cursor='grabbing';}
+    });
+    c.addEventListener('mouseup',()=>{r.dragNode=null;if(r.mode==='drag')c.style.cursor='grab';});
+    c.addEventListener('click',e=>{
+      if(r.wasDrag){r.wasDrag=false;return;}
+      const rect=c.getBoundingClientRect(),mx=e.clientX-rect.left,my=e.clientY-rect.top,n=r.nodeAt(mx,my);
+      closeCtx();
+      if(r.mode==='select'){
+        if(n&&cfg.onNodeClick) cfg.onNodeClick(n);
+        return;
+      }
+      if(r.mode==='addNode'){if(!n)r.addNodeAt(mx,my);return;}
+      if(r.mode==='addEdge'){
+        if(!n)return;
+        if(!r.edgeFirst){r.edgeFirst=n;cfg.onDraw();return;}
+        if(n===r.edgeFirst){r.edgeFirst=null;cfg.onDraw();return;}
+        const dup=cfg.directed?cfg.edges.some(e=>e.u===r.edgeFirst&&e.v===n)
+          :cfg.edges.some(e=>(e.u===r.edgeFirst&&e.v===n)||(e.u===n&&e.v===r.edgeFirst));
+        if(dup){r.edgeFirst=null;cfg.onDraw();return;}
+        r.pendingEdge={u:r.edgeFirst,v:n}; r.edgeFirst=null;
+        openWPop(e.clientX,e.clientY,false,cfg.negWeights?-9:1,cfg.defaultW||1);
+        return;
+      }
+      if(r.mode==='delete'){
+        if(n){r.deleteNode(n);return;}
+        const ei=r.edgeAt(mx,my);
+        if(ei>=0){cfg.edges.splice(ei,1);cfg.onReset();cfg.onDraw();}
+      }
+    });
+    c.addEventListener('dblclick',e=>{
+      const rect=c.getBoundingClientRect(),mx=e.clientX-rect.left,my=e.clientY-rect.top;
+      if(r.nodeAt(mx,my))return;
+      const ei=r.edgeAt(mx,my);
+      if(ei>=0){r.editEdgeIdx=ei;r.pendingEdge=null;openWPop(e.clientX,e.clientY,true,cfg.negWeights?-99:1,cfg.edges[ei].w);}
+    });
+    c.addEventListener('contextmenu',e=>{
+      e.preventDefault();
+      const rect=c.getBoundingClientRect(),n=r.nodeAt(e.clientX-rect.left,e.clientY-rect.top);
+      if(n) openCtx(n,e.clientX,e.clientY,cfg);
+    });
+  }
+  attachEvents();
+  return r;
+}
+
+// ── wPop (shared weight popup) ───────────────────────────────────
+let wPopCfg = null;
+function openWPop(cx,cy,isEdit,minVal=1,val=1){
+  wPopCfg={isEdit};
+  const p=document.getElementById('wPop');
+  document.getElementById('wPopLabel').textContent=isEdit?'EDIT WEIGHT / CAPACITY':'WEIGHT / CAPACITY';
+  p.style.display='block';
+  p.style.left=Math.min(cx+8,window.innerWidth-180)+'px';
+  p.style.top=Math.min(cy-15,window.innerHeight-90)+'px';
+  const inp=document.getElementById('wPopInput');
+  inp.min=minVal; inp.value=val;
+  setTimeout(()=>inp.select(),40);
+}
+function wPopOK(){
+  const w=parseInt(document.getElementById('wPopInput').value)||1;
+  const tab=activeTab;
+  const ed=EDITORS[tab];
+  const cfg=CFGS[tab];
+  if(!ed||!cfg)return;
+  if(wPopCfg.isEdit){
+    if(ed.editEdgeIdx>=0&&ed.editEdgeIdx<cfg.edges.length) cfg.edges[ed.editEdgeIdx].w=w;
+    ed.editEdgeIdx=-1;
+  } else {
+    if(ed.pendingEdge) cfg.edges.push({u:ed.pendingEdge.u,v:ed.pendingEdge.v,w});
+    ed.pendingEdge=null;
+  }
+  document.getElementById('wPop').style.display='none';
+  cfg.onReset(); cfg.onDraw();
+}
+function wPopCancel(){
+  const tab=activeTab; const ed=EDITORS[tab];
+  if(ed){ed.pendingEdge=null;ed.editEdgeIdx=-1;}
+  document.getElementById('wPop').style.display='none';
+  if(CFGS[tab]) CFGS[tab].onDraw();
+}
+document.getElementById('wPopInput').addEventListener('keydown',e=>{if(e.key==='Enter')wPopOK();if(e.key==='Escape')wPopCancel();});
+
+// ── Context menu (shared) ───────────────────────────────────────
+let ctxCfg=null, ctxNode2=null;
+function openCtx(n,cx,cy,cfg){
+  ctxCfg=cfg; ctxNode2=n;
+  const m=document.getElementById('ctxMenu');
+  document.getElementById('ctxSnk').style.display=cfg.hasSnk?'block':'none';
+  document.getElementById('ctxTgt').style.display=cfg.hasTgt!==false?'block':'none';
+  m.style.display='block'; m.style.left=cx+'px'; m.style.top=cy+'px';
+}
+function closeCtx(){document.getElementById('ctxMenu').style.display='none';ctxCfg=null;ctxNode2=null;}
+function ctxAction(act){
+  if(!ctxCfg||!ctxNode2){closeCtx();return;}
+  if(act==='src'){ctxCfg.src=ctxNode2;if(ctxCfg.onSrcChange)ctxCfg.onSrcChange();}
+  if(act==='tgt'){if(ctxNode2!==ctxCfg.src){ctxCfg.tgt=ctxNode2;if(ctxCfg.onTgtChange)ctxCfg.onTgtChange();}}
+  if(act==='snk'){if(ctxNode2!==ctxCfg.src){ctxCfg.src2=ctxNode2;if(ctxCfg.onSnkChange)ctxCfg.onSnkChange();}}
+  if(act==='del'){const ed=EDITORS[activeTab];if(ed)ed.deleteNode(ctxNode2);}
+  closeCtx(); CFGS[activeTab].onDraw();
+}
+document.addEventListener('click',e=>{if(!e.target.closest('.ctx-menu')&&!e.target.closest('canvas'))closeCtx();});
+
+// ── Shared draw primitives ──────────────────────────────────────
+function drawArrow(ctx,x1,y1,x2,y2,color,lw,glow){
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
+  ctx.strokeStyle=color; ctx.lineWidth=lw;
+  ctx.shadowColor=glow||'transparent'; ctx.shadowBlur=glow?8:0;
+  ctx.stroke(); ctx.shadowBlur=0;
+  const dx=x2-x1,dy=y2-y1,l=Math.sqrt(dx*dx+dy*dy)||1;
+  const ux=dx/l,uy=dy/l,ah=9,aw=4.5;
+  const ax=x2-ux*ah,ay=y2-uy*ah,px=-uy,py=ux;
+  ctx.beginPath(); ctx.moveTo(x2,y2);
+  ctx.lineTo(ax+px*aw,ay+py*aw); ctx.lineTo(ax-px*aw,ay-py*aw);
+  ctx.closePath(); ctx.fillStyle=color; ctx.fill();
+}
+
+function drawEdgeBase(ctx,nodes,edges,directed,highlightSet,hovEdge,pathColor,defaultColor){
+  edges.forEach(({u,v,w},i)=>{
+    const a=nodes[u],b=nodes[v]; if(!a||!b)return;
+    const key=u+'-'+v, keyR=v+'-'+u;
+    const inHL=highlightSet&&(highlightSet.has(key)||(!directed&&highlightSet.has(keyR)));
+    const isHov=hovEdge===i;
+    const color=inHL?pathColor:isHov?'#ff5544':defaultColor||'#1a2a40';
+    const lw=inHL?2.5:isHov?2:1.5;
+    if(directed){
+      const dx=b.x-a.x,dy=b.y-a.y,l=Math.sqrt(dx*dx+dy*dy)||1;
+      drawArrow(ctx,a.x+dx/l*NR,a.y+dy/l*NR,b.x-dx/l*NR,b.y-dy/l*NR,color,lw,inHL?color:null);
+    } else {
+      ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
+      ctx.strokeStyle=color; ctx.lineWidth=lw;
+      ctx.shadowColor=inHL?color:'transparent'; ctx.shadowBlur=inHL?8:0;
+      ctx.stroke(); ctx.shadowBlur=0;
+    }
+    // Weight label
+    if(w!==undefined){
+      const mx=(a.x+b.x)/2,my=(a.y+b.y)/2;
+      const ox=-(b.y-a.y)/Math.sqrt((b.x-a.x)**2+(b.y-a.y)**2||1)*11;
+      const oy=(b.x-a.x)/Math.sqrt((b.x-a.x)**2+(b.y-a.y)**2||1)*11;
+      ctx.font='10px Share Tech Mono,monospace';
+      ctx.fillStyle=inHL?'#ffcc44':isHov?'#ff8888':'#2a4a6a';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(w,mx+ox,my+oy);
+    }
+  });
+}
+
+function drawNodeBase(ctx,nodes,nodeStates,src,tgt,src2,hov,edgeFirst){
+  // nodeStates: map of node->{ fill, stroke, glow, textColor }
+  Object.keys(nodes).forEach(n=>{
+    const {x,y}=nodes[n];
+    const st=nodeStates[n]||{fill:'#0d1828',stroke:'#2a5a9a',glow:null,textColor:'#7ab3ff'};
+    const isHov=hov===n, isEF=edgeFirst===n;
+    let {fill,stroke,glow,textColor}=st;
+    if(isEF){stroke='#aadd00';glow='#aadd00';}
+    else if(isHov&&!st.glow){stroke='#aaccff';}
+    if(glow){ctx.shadowColor=glow;ctx.shadowBlur=14;}
+    ctx.beginPath(); ctx.arc(x,y,NR,0,Math.PI*2);
+    ctx.fillStyle=fill; ctx.fill();
+    ctx.strokeStyle=stroke; ctx.lineWidth=(n===src||n===tgt||n===src2)?2.2:1.5;
+    ctx.stroke(); ctx.shadowBlur=0;
+    // rings
+    if(n===src){ctx.beginPath();ctx.arc(x,y,26,0,Math.PI*2);ctx.strokeStyle='rgba(0,212,255,.2)';ctx.lineWidth=1;ctx.stroke();}
+    if(n===tgt&&tgt!==src){ctx.beginPath();ctx.arc(x,y,26,0,Math.PI*2);ctx.strokeStyle='rgba(255,102,34,.25)';ctx.lineWidth=1;ctx.setLineDash([3,3]);ctx.stroke();ctx.setLineDash([]);}
+    if(n===src2&&src2!==src){ctx.beginPath();ctx.arc(x,y,26,0,Math.PI*2);ctx.strokeStyle='rgba(255,200,50,.25)';ctx.lineWidth=1;ctx.setLineDash([3,3]);ctx.stroke();ctx.setLineDash([]);}
+    ctx.font='bold 12px Rajdhani,sans-serif';
+    ctx.fillStyle=textColor; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(n,x,y);
+  });
+}
+
+function labelSrcTgt(ctx,nodes,src,tgt,src2){
+  ctx.font='9px Share Tech Mono,monospace'; ctx.textAlign='center';
+  if(nodes[src]){ctx.fillStyle='rgba(0,212,255,.5)';ctx.fillText('SRC',nodes[src].x,nodes[src].y-33);}
+  if(nodes[tgt]&&tgt!==src){ctx.fillStyle='rgba(255,102,34,.5)';ctx.fillText('TGT',nodes[tgt].x,nodes[tgt].y-33);}
+  if(nodes[src2]&&src2&&src2!==src){ctx.fillStyle='rgba(255,200,50,.5)';ctx.fillText('SNK',nodes[src2].x,nodes[src2].y-33);}
+}
+
+function randGraphUndirected(n,canvasId,negOk){
+  const cv=document.getElementById(canvasId);
+  const W=cv.width,H=cv.height,pad=50,alpha='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const labels=[]; for(let i=0;i<n;i++)labels.push(i<26?alpha[i]:alpha[i-26]+'1');
+  const nN={},placed=[];let att=0;
+  for(let i=0;i<n;i++){let x,y,ok;do{x=pad+Math.random()*(W-pad*2);y=pad+Math.random()*(H-pad*2);ok=placed.every(p=>Math.hypot(x-p.x,y-p.y)>65);att++;}while(!ok&&att<2000);placed.push({x,y});nN[labels[i]]={x:Math.round(x),y:Math.round(y)};}
+  const sh=[...labels].sort(()=>Math.random()-.5),nE=[],inT=new Set([sh[0]]);
+  for(let i=1;i<sh.length;i++){const v=sh[i],tA=[...inT],u=tA[Math.floor(Math.random()*tA.length)];nE.push({u,v,w:(negOk?(Math.random()<.2?-(1+Math.floor(Math.random()*5)):1)+Math.floor(Math.random()*10):1+Math.floor(Math.random()*12))});inT.add(v);}
+  const ex=Math.floor(n*(0.3+Math.random()*0.4));let tries=0;
+  while(nE.length<n-1+ex&&tries<500){tries++;const a=labels[Math.floor(Math.random()*n)],b=labels[Math.floor(Math.random()*n)];if(a===b)continue;if(nE.some(e=>(e.u===a&&e.v===b)||(e.u===b&&e.v===a)))continue;nE.push({u:a,v:b,w:negOk&&Math.random()<.2?-(1+Math.floor(Math.random()*4)):1+Math.floor(Math.random()*12)});}
+  return {nodes:nN,edges:nE,src:labels[0],tgt:labels[n-1]};
+}
+
+function randGraphDAG(n,canvasId){
+  const cv=document.getElementById(canvasId);
+  const W=cv.width,H=cv.height,pad=50,alpha='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const labels=[]; for(let i=0;i<n;i++)labels.push(i<26?alpha[i]:alpha[i-26]+'1');
+  // Place left-to-right
+  const cols=Math.ceil(Math.sqrt(n*1.5));
+  const nN={};
+  labels.forEach((l,i)=>{
+    const col=i%cols,row=Math.floor(i/cols);
+    nN[l]={x:Math.round(pad+col*(W-pad*2)/(cols-1||1)),y:Math.round(pad+row*(H-pad*2)/Math.max(1,Math.ceil(n/cols)-1))};
+  });
+  const nE=[];
+  for(let i=0;i<n-1;i++){nE.push({u:labels[i],v:labels[i+1],w:undefined});}
+  const ex=Math.floor(n*0.5);let tries=0;
+  while(nE.length<n-1+ex&&tries<500){tries++;const ai=Math.floor(Math.random()*n),bi=Math.floor(Math.random()*n);if(ai>=bi)continue;if(nE.some(e=>e.u===labels[ai]&&e.v===labels[bi]))continue;nE.push({u:labels[ai],v:labels[bi],w:undefined});}
+  return {nodes:nN,edges:nE};
+}
+
+// ── History helpers ─────────────────────────────────────────────
+function saveSnap(hist,state){ hist.push(JSON.parse(JSON.stringify(state))); }
+function restoreSnap(hist){ return hist.length?hist.pop():null; }
+function updateBackBtn(id,hist){ const b=document.getElementById('back-btn-'+id);if(b){b.disabled=hist.length===0;b.style.opacity=hist.length?'1':'0.4';} }
+
+// ── Random node placer for FF ───────────────────────────────────
+function randGraphDirected(n,canvasId){
+  const cv=document.getElementById(canvasId);
+  const W=cv.width,H=cv.height,pad=55;
+  const pool=['S','A','B','C','D','E','F','G','H','I','J','K'];
+  const labels=[];
+  for(let i=0;i<n;i++)labels.push(i<pool.length?pool[i]:'N'+i);
+  labels[n-1]='T';
+  const nN={},placed=[];let att=0;
+  for(let i=0;i<n;i++){let x,y,ok;do{x=pad+Math.random()*(W-pad*2);y=pad+Math.random()*(H-pad*2);ok=placed.every(p=>Math.hypot(x-p.x,y-p.y)>70);att++;}while(!ok&&att<2000);placed.push({x,y});nN[labels[i]]={x:Math.round(x),y:Math.round(y)};}
+  nN['S'].x=pad; nN['T'].x=W-pad;
+  const sorted=[...labels];
+  const nE=[];
+  for(let i=0;i<sorted.length-1;i++)nE.push({u:sorted[i],v:sorted[i+1],w:2+Math.floor(Math.random()*12)});
+  const ex=Math.floor(n*0.8);let tries=0;
+  while(nE.length<sorted.length-1+ex&&tries<500){tries++;const ai=Math.floor(Math.random()*n),bi=Math.floor(Math.random()*n);if(ai===bi||bi<=ai)continue;const a=sorted[ai],b=sorted[bi];if(nE.some(e=>e.u===a&&e.v===b))continue;nE.push({u:a,v:b,w:2+Math.floor(Math.random()*10)});}
+  return {nodes:nN,edges:nE};
+}
+
+// Store all editors and configs
+const EDITORS = {};
+const CFGS = {};
+
+// ═══════════════════════════════════════════════════════════════
+//  1. DIJKSTRA
+// ═══════════════════════════════════════════════════════════════
+(function(){
+  const ID='dijk';
+  const cfg={
+    id:ID, directed:false, negWeights:false, defaultW:4,
+    nodes:{A:{x:95,y:95},B:{x:270,y:55},C:{x:450,y:95},D:{x:55,y:255},E:{x:215,y:235},F:{x:375,y:215},G:{x:490,y:295},H:{x:125,y:375},I:{x:305,y:385},J:{x:465,y:415}},
+    edges:[{u:'A',v:'B',w:4},{u:'A',v:'D',w:2},{u:'B',v:'C',w:5},{u:'B',v:'E',w:3},{u:'C',v:'F',w:4},{u:'C',v:'G',w:7},{u:'D',v:'E',w:6},{u:'D',v:'H',w:5},{u:'E',v:'F',w:2},{u:'E',v:'I',w:8},{u:'F',v:'G',w:3},{u:'F',v:'I',w:4},{u:'G',v:'J',w:5},{u:'H',v:'I',w:3},{u:'I',v:'J',w:6},{u:'B',v:'F',w:9},{u:'H',v:'J',w:10}],
+    src:'A', tgt:'J', hasTgt:true, hasSnk:false,
+    onDraw:()=>dijkDraw(), onReset:()=>dijkReset(),
+    onNodeClick:(n)=>{ if(n!==cfg.src){cfg.tgt=n;document.getElementById('dijk-tgt').textContent=n;dijkReset();} },
+    onSrcChange:()=>{ if(cfg.tgt===cfg.src)cfg.tgt=Object.keys(cfg.nodes).find(n=>n!==cfg.src)||cfg.src; document.getElementById('dijk-src').textContent=cfg.src;document.getElementById('dijk-tgt').textContent=cfg.tgt;dijkReset(); },
+    onTgtChange:()=>{ document.getElementById('dijk-tgt').textContent=cfg.tgt; dijkReset(); }
+  };
+  CFGS[ID]=cfg;
+
+  makeSection(ID,'#00d4ff',`
+    <div class="panel">
+      <h2 class="h-dijk">// DISTANCES</h2>
+      <table class="gen-table" id="dijk-table"></table>
+      <div class="info" id="dijk-info">Click a node to set target, then STEP.</div>
+    </div>
+    <div class="panel">
+      <h2 class="h-dijk">// DIJKSTRA</h2>
+      <div style="font-size:.72rem;color:#4a6080;font-family:'Share Tech Mono',monospace;margin-bottom:6px">
+        src:<span style="color:#00d4ff" id="dijk-src">A</span> &nbsp; tgt:<span style="color:#ff8844" id="dijk-tgt">J</span>
+      </div>
+      <div class="controls">
+        <button id="back-btn-dijk" disabled style="opacity:.4" onclick="dijkBack()">← BACK</button>
+        <button class="pri" onclick="dijkStep()">STEP →</button>
+        <button onclick="dijkRunAll()">RUN ALL</button>
+        <button onclick="dijkReset()">RESET</button>
+      </div>
+    </div>
+    <div class="panel">
+      <h2 class="h-dijk">// EDIT</h2>
+      <div class="edit-hint"><b>SELECT</b> click node→target<br><b>DRAG</b> move nodes<br><b>+NODE</b> place node<br><b>EDGE</b> connect nodes<br><b>DELETE</b> remove<br><b>Right-click</b> node options<br><b>Dbl-click</b> edge→edit weight</div>
+      <div class="edit-section" id="add-node-sec-dijk" style="display:none;margin-top:6px"><label>LABEL</label><input id="new-node-dijk" maxlength="2" placeholder="auto"></div>
+      <div style="margin-top:8px"><div class="edit-section" style="margin-bottom:4px"><label>RANDOM SIZE</label><input id="dijk-rand-sz" type="number" min="3" max="15" value="8" style="width:55px"> <span style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:#2a4a6a">nodes</span></div>
+      <button style="width:100%;font-size:.75rem" onclick="dijkRandom()">⚄ RANDOM</button></div>
+      <div class="controls"><button class="danger" onclick="dijkClear()">CLEAR</button></div>
+    </div>`,
+    `${legendItem('#1a3a6a','#2a5a9a','unvisited')}${legendItem('#00d4ff','#00d4ff','current')}${legendItem('#00aa44','#00ff66','visited')}${legendItem('#ff6622','#ff8844','path')}`,
+    [['select','◎ SELECT',true],['drag','⊹ DRAG',false],['addNode','+ NODE',false],['addEdge','⟶ EDGE',false],['delete','✕ DEL',false]]
+  );
+
+  EDITORS[ID]=makeEditor(cfg);
+
+  // Dijkstra state
+  let dist={},prev={},vis=new Set(),pq=[],cur=null,done=false,started=false,hist=[];
+
+  function dijkReset(){
+    dist={};prev={};vis=new Set();pq=[];cur=null;done=false;started=false;hist=[];
+    Object.keys(cfg.nodes).forEach(n=>{dist[n]=Infinity;prev[n]=null;});
+    if(cfg.nodes[cfg.src]){dist[cfg.src]=0;pq=[[cfg.src,0]];}
+    document.getElementById('dijk-info').innerHTML='Press <span>STEP →</span> from <span>'+cfg.src+'</span>.';
+    updateBackBtn(ID,hist);dijkTable();dijkDraw();
+  }
+  cfg.onReset=dijkReset;
+
+  function dijkStep(){
+    if(done)return;
+    saveSnap(hist,{dist,prev,vis:[...vis],pq:pq.map(x=>[...x]),cur,done,started,info:document.getElementById('dijk-info').innerHTML});
+    updateBackBtn(ID,hist); started=true;
+    if(!pq.filter(([n])=>!vis.has(n)).length){done=true;dijkFinalize();return;}
+    pq.sort((a,b)=>a[1]-b[1]);
+    let u,d; do{if(!pq.length){done=true;dijkFinalize();return;}[u,d]=pq.shift();}while(vis.has(u));
+    cur=u;vis.add(u);
+    const adj={};Object.keys(cfg.nodes).forEach(n=>adj[n]=[]);
+    cfg.edges.forEach(({u:a,v:b,w})=>{if(adj[a]&&adj[b]){adj[a].push([b,w]);adj[b].push([a,w]);}});
+    (adj[u]||[]).forEach(([v,w])=>{if(!vis.has(v)&&dist[u]+w<dist[v]){dist[v]=dist[u]+w;prev[v]=u;pq.push([v,dist[v]]);}});
+    const nb=(adj[u]||[]).map(([v,w])=>`${v}(${w})`).join(',')||'—';
+    document.getElementById('dijk-info').innerHTML=`visit <span>${u}</span> d=<span>${d===Infinity?'∞':d}</span><br>relax:${nb}`;
+    if(u===cfg.tgt){done=true;dijkFinalize();return;}
+    if(!pq.filter(([n])=>!vis.has(n)).length){done=true;dijkFinalize();}
+    dijkTable();dijkDraw();
+  }
+  window.dijkStep=dijkStep;
+
+  function dijkBack(){
+    const s=restoreSnap(hist);if(!s)return;
+    dist=s.dist;prev=s.prev;vis=new Set(s.vis);pq=s.pq;cur=s.cur;done=s.done;started=s.started;
+    document.getElementById('dijk-info').innerHTML=s.info;
+    updateBackBtn(ID,hist);dijkTable();dijkDraw();
+  }
+  window.dijkBack=dijkBack;
+
+  function dijkFinalize(){
+    cur=null;
+    const info=dist[cfg.tgt]===Infinity?`No path to <span>${cfg.tgt}</span>.`
+      :`<span>${cfg.tgt}</span> cost:<span>${dist[cfg.tgt]}</span><br><span>${getPath().join('→')}</span>`;
+    document.getElementById('dijk-info').innerHTML=info;dijkTable();dijkDraw();
+  }
+  function getPath(){const p=[];let n=cfg.tgt;while(n){p.unshift(n);n=prev[n];}return p;}
+  function getPathSet(){
+    if(!done||dist[cfg.tgt]===Infinity)return new Set();
+    const path=getPath(),s=new Set();
+    for(let i=0;i<path.length-1;i++){s.add(path[i]+'-'+path[i+1]);s.add(path[i+1]+'-'+path[i]);}return s;
+  }
+  function dijkTable(){
+    document.getElementById('dijk-table').innerHTML=Object.keys(cfg.nodes).map(n=>{
+      const cls=vis.has(n)?'vis':(n===cur?'cur':'');
+      return `<tr class="${cls}"><td>${n}</td><td>${dist[n]===Infinity?'∞':dist[n]}${prev[n]?'←'+prev[n]:''}</td></tr>`;
+    }).join('');
+  }
+  function dijkDraw(){
+    const cv=document.getElementById('cv-'+ID);const c=cv.getContext('2d');
+    c.clearRect(0,0,cv.width,cv.height);
+    const pN=done&&dist[cfg.tgt]!==Infinity?new Set(getPath()):new Set();
+    const pE=getPathSet();
+    const ed=EDITORS[ID];
+    drawEdgeBase(c,cfg.nodes,cfg.edges,false,pE,ed.hEdge,'#ff6622');
+    if(ed.mode==='addEdge'&&ed.edgeFirst&&ed.hNode&&ed.hNode!==ed.edgeFirst){
+      const a=cfg.nodes[ed.edgeFirst],b=cfg.nodes[ed.hNode];
+      c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.strokeStyle='rgba(170,221,0,.5)';c.lineWidth=1.5;c.setLineDash([5,5]);c.stroke();c.setLineDash([]);
+    }
+    const ns={};
+    Object.keys(cfg.nodes).forEach(n=>{
+      let fill='#0d1828',stroke='#2a5a9a',glow=null,textColor='#7ab3ff';
+      if(pN.has(n)&&done){fill='#331500';stroke='#ff6622';glow='#ff6622';textColor='#ff8844';}
+      else if(n===cur){fill='#003344';stroke='#00d4ff';glow='#00d4ff';textColor='#00d4ff';}
+      else if(vis.has(n)){fill='#001a0a';stroke='#00aa44';glow='#00ff66';textColor='#00cc55';}
+      ns[n]={fill,stroke,glow,textColor};
+    });
+    drawNodeBase(c,cfg.nodes,ns,cfg.src,cfg.tgt,null,ed.hNode,ed.edgeFirst);
+    labelSrcTgt(c,cfg.nodes,cfg.src,cfg.tgt,null);
+    if(started)Object.keys(cfg.nodes).forEach(n=>{
+      if(dist[n]!==Infinity){c.font='9px Share Tech Mono,monospace';c.fillStyle='#4a8aaa';c.textAlign='center';c.fillText(dist[n],cfg.nodes[n].x,cfg.nodes[n].y+32);}
+    });
+  }
+  window.dijkDraw=dijkDraw;
+  window.dijkReset=dijkReset;
+  window.dijkRunAll=function(){if(done)dijkReset();let i=0;const iv=setInterval(()=>{dijkStep();i++;if(done||i>400)clearInterval(iv);},100);};
+  window.dijkRandom=function(){const n=Math.max(3,Math.min(15,parseInt(document.getElementById('dijk-rand-sz').value)||8));const g=randGraphUndirected(n,'cv-dijk');cfg.nodes=g.nodes;cfg.edges=g.edges;cfg.src=g.src;cfg.tgt=g.tgt;document.getElementById('dijk-src').textContent=cfg.src;document.getElementById('dijk-tgt').textContent=cfg.tgt;dijkReset();};
+  window.dijkClear=function(){if(!confirm('Clear?'))return;cfg.nodes={A:{x:280,y:220}};cfg.edges=[];cfg.src='A';cfg.tgt='A';document.getElementById('dijk-src').textContent='A';document.getElementById('dijk-tgt').textContent='A';dijkReset();};
+  window.dijkSetMode=function(m){EDITORS[ID].setMode(m);};
+  dijkReset();
+})();
+
+// ═══════════════════════════════════════════════════════════════
+//  2. FORD-FULKERSON
+// ═══════════════════════════════════════════════════════════════
+(function(){
+  const ID='ff';
+  const cfg={
+    id:ID,directed:true,negWeights:false,defaultW:5,hasSnk:true,hasTgt:false,
+    nodes:{S:{x:55,y:220},A:{x:185,y:95},B:{x:185,y:340},C:{x:335,y:95},D:{x:335,y:340},E:{x:475,y:175},F:{x:475,y:265},T:{x:515,y:220}},
+    edges:[{u:'S',v:'A',w:10},{u:'S',v:'B',w:8},{u:'A',v:'C',w:5},{u:'A',v:'D',w:7},{u:'B',v:'A',w:3},{u:'B',v:'D',w:6},{u:'C',v:'E',w:8},{u:'D',v:'E',w:4},{u:'D',v:'F',w:5},{u:'E',v:'T',w:9},{u:'F',v:'T',w:7}],
+    src:'S',src2:'T',labelPool:['S','T','A','B','C','D','E','F','G','H','I','J'],
+    onDraw:()=>ffDraw(),onReset:()=>ffReset(),
+    onSrcChange:()=>{document.getElementById('ff-src').textContent=cfg.src;ffReset();},
+    onSnkChange:()=>{document.getElementById('ff-snk').textContent=cfg.src2;ffReset();}
+  };
+  CFGS[ID]=cfg;
+  makeSection(ID,'#cc88ff',`
+    <div class="panel">
+      <h2 class="h-ff">// MAX FLOW</h2>
+      <div class="flow-bar-wrap"><div class="flow-bar-label">flow:<span id="ff-flow-val" style="color:#cc88ff">0</span>/<span id="ff-max-cap">?</span></div><div class="flow-bar"><div class="flow-bar-fill" id="ff-flow-bar" style="width:0%"></div></div></div>
+      <div style="margin-top:8px;max-height:160px;overflow-y:auto"><table style="width:100%;border-collapse:collapse" id="ff-edge-table"><thead><tr><th style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:#5a6a8a;padding:2px 4px;text-align:left">EDGE</th><th style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:#5a6a8a;padding:2px 4px">F</th><th style="font-family:'Share Tech Mono',monospace;font-size:.62rem;color:#5a6a8a;padding:2px 4px">CAP</th></tr></thead><tbody id="ff-edge-body"></tbody></table></div>
+      <div class="info c-ff" id="ff-info">Press STEP to find augmenting paths.</div>
+    </div>
+    <div class="panel">
+      <h2 class="h-ff">// FORD-FULKERSON</h2>
+      <div style="font-size:.72rem;color:#7a6a9a;font-family:'Share Tech Mono',monospace;margin-bottom:6px">src:<span style="color:#cc88ff" id="ff-src">S</span> snk:<span style="color:#ffcc44" id="ff-snk">T</span></div>
+      <div class="controls">
+        <button id="back-btn-ff" disabled style="opacity:.4" onclick="ffBack()">← BACK</button>
+        <button style="background:#1a0a2a;border-color:#cc88ff;color:#cc88ff" onclick="ffStep()">STEP →</button>
+        <button onclick="ffRunAll()">RUN ALL</button>
+        <button onclick="ffReset()">RESET</button>
+      </div>
+    </div>
+    <div class="panel">
+      <h2 class="h-ff">// EDIT</h2>
+      <div class="edit-hint"><b>EDGE</b> = directed capacity<br><b>Dbl-click</b> edge → edit cap<br><b>Right-click</b> → set src/snk</div>
+      <div style="margin-top:8px"><div class="edit-section" style="margin-bottom:4px"><label>RANDOM SIZE</label><input id="ff-rand-sz" type="number" min="3" max="12" value="7" style="width:55px"> <span style="font-family:'Share Tech Mono',monospace;font-size:.6rem;color:#2a4a6a">nodes</span></div>
+      <button style="width:100%;font-size:.75rem" onclick="ffRandom()">⚄ RANDOM</button></div>
+      <div class="controls"><button class="danger" onclick="ffClear()">CLEAR</button></div>
+    </div>`,
+    `${legendItem('#1a0a2a','#5a3a8a','no flow')}${legendItem('#cc88ff','#ee99ff','augmenting')}${legendItem('#997700','#ffcc44','saturated')}${legendItem('#007740','#00ff88','has flow')}`,
+    [['select','◎ SELECT',true],['drag','⊹ DRAG',false],['addNode','+ NODE',false],['addEdge','⟶ EDGE',false],['delete','✕ DEL',false]]
+  );
+  EDITORS[ID]=makeEditor(cfg);
+
+  let ffFlow={},ffTotal=0,ffDone=false,ffPath=[],ffHist=[];
+  function ffInitFlow(){
+    ffFlow={};
+    Object.keys(cfg.nodes).forEach(u=>{ffFlow[u]={};});
+    cfg.edges.forEach(({u,v})=>{if(!ffFlow[u])ffFlow[u]={};if(!ffFlow[v])ffFlow[v]={};ffFlow[u][v]=ffFlow[u][v]||0;ffFlow[v][u]=ffFlow[v][u]||0;});
+    ffTotal=0;ffDone=false;ffPath=[];
+  }
+  function ffReset(){ffHist=[];ffInitFlow();document.getElementById('ff-info').innerHTML='Press <span>STEP →</span> to begin.';ffUpdateTable();ffUpdateBar();updateBackBtn(ID,ffHist);ffDraw();}
+  cfg.onReset=ffReset;
+
+  function ffBFS(){
+    const parent={},vis=new Set([cfg.src]),q=[cfg.src];
+    while(q.length){
+      const node=q.shift();
+      if(node===cfg.src2){const p=[node];let c=node;while(c!==cfg.src){c=parent[c];p.unshift(c);}return p;}
+      for(const edge of cfg.edges){
+        const s=edge.u,d=edge.v,cap=edge.w;
+        if(s===node&&!vis.has(d)){const res=cap-((ffFlow[s]&&ffFlow[s][d])||0);if(res>0){vis.add(d);parent[d]=node;q.push(d);}}
+      }
+      for(const edge of cfg.edges){
+        const s=edge.u,d=edge.v;
+        if(d===node&&!vis.has(s)){const bf=(ffFlow[s]&&ffFlow[s][d])||0;if(bf>0){vis.add(s);parent[s]=node;q.push(s);}}
+      }
+    }return null;
+  }
+  function ffBN(path){
+    let min=Infinity;
+    for(let i=0;i<path.length-1;i++){const pu=path[i],pv=path[i+1];const fe=cfg.edges.find(e=>e.u===pu&&e.v===pv);if(fe)min=Math.min(min,fe.w-((ffFlow[pu]&&ffFlow[pu][pv])||0));else min=Math.min(min,(ffFlow[pv]&&ffFlow[pv][pu])||0);}return min;
+  }
+  function ffPush(path,amount){
+    for(let i=0;i<path.length-1;i++){const pu=path[i],pv=path[i+1];if(!ffFlow[pu])ffFlow[pu]={};if(!ffFlow[pv])ffFlow[pv]={};const fe=cfg.edges.find(e=>e.u===pu&&e.v===pv);if(fe)ffFlow[pu][pv]=(ffFlow[pu][pv]||0)+amount;else ffFlow[pv][pu]=(ffFlow[pv][pu]||0)-amount;}ffTotal+=amount;
+  }
+  function ffStep(){
+    if(ffDone)return;
+    const fc={};Object.keys(ffFlow).forEach(u=>{fc[u]={...ffFlow[u]};});
+    saveSnap(ffHist,{flow:fc,total:ffTotal,done:ffDone,path:[...ffPath],info:document.getElementById('ff-info').innerHTML});
+    updateBackBtn(ID,ffHist);
+    const path=ffBFS();
+    if(!path){ffDone=true;ffPath=[];document.getElementById('ff-info').innerHTML=`<span>Max flow = ${ffTotal}</span><br>No more augmenting paths.`;ffUpdateTable();ffUpdateBar();ffDraw();return;}
+    const bn=ffBN(path);ffPath=path;ffPush(path,bn);
+    document.getElementById('ff-info').innerHTML=`Path:<span>${path.join('→')}</span><br>Bottleneck:<b>${bn}</b> Total:<span>${ffTotal}</span>`;
+    ffUpdateTable();ffUpdateBar();ffDraw();
+  }
+  function ffBack(){
+    const s=restoreSnap(ffHist);if(!s)return;
+    const fc={};Object.keys(s.flow).forEach(u=>{fc[u]={...s.flow[u]};});
+    ffFlow=fc;ffTotal=s.total;ffDone=s.done;ffPath=s.path;
+    document.getElementById('ff-info').innerHTML=s.info;
+    updateBackBtn(ID,ffHist);ffUpdateTable();ffUpdateBar();ffDraw();
+  }
+  function ffUpdateTable(){
+    const ps=new Set();if(ffPath.length>1)for(let i=0;i<ffPath.length-1;i++)ps.add(ffPath[i]+'-'+ffPath[i+1]);
+    document.getElementById('ff-edge-body').innerHTML=cfg.edges.map(({u,v,w})=>{
+      const f=(ffFlow[u]&&ffFlow[u][v])||0,ip=ps.has(u+'-'+v);
+      return `<tr${ip?' style="background:rgba(255,200,60,.07)"':''}><td style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:${ip?'#ffcc44':'#cc88ff'};padding:2px 4px">${u}→${v}</td><td style="font-family:'Share Tech Mono',monospace;font-size:.7rem;padding:2px 4px;text-align:right">${f}</td><td style="font-family:'Share Tech Mono',monospace;font-size:.7rem;padding:2px 4px;text-align:right">${w}</td></tr>`;
+    }).join('');
+  }
+  function ffUpdateBar(){
+    document.getElementById('ff-flow-val').textContent=ffTotal;
+    const mx=cfg.edges.filter(e=>e.u===cfg.src).reduce((s,e)=>s+e.w,0);
+    document.getElementById('ff-max-cap').textContent=mx;
+    document.getElementById('ff-flow-bar').style.width=mx>0?Math.min(100,ffTotal/mx*100)+'%':'0%';
+  }
+  function ffDraw(){
+    const cv=document.getElementById('cv-'+ID);const c=cv.getContext('2d');
+    c.clearRect(0,0,cv.width,cv.height);
+    const ps=new Set();if(ffPath.length>1)for(let i=0;i<ffPath.length-1;i++)ps.add(ffPath[i]+'-'+ffPath[i+1]);
+    const ed=EDITORS[ID];
+    cfg.edges.forEach(({u,v,w},i)=>{
+      const a=cfg.nodes[u],b=cfg.nodes[v];if(!a||!b)return;
+      const f=(ffFlow[u]&&ffFlow[u][v])||0;
+      const sat=f>=w,inP=ps.has(u+'-'+v),hf=f>0,hov=ed.hEdge===i;
+      const color=sat?'#997700':inP?'#cc88ff':hf?'#007740':hov?'#9944ff':'#1a2a40';
+      const dx=b.x-a.x,dy=b.y-a.y,l=Math.sqrt(dx*dx+dy*dy)||1;
+      drawArrow(c,a.x+dx/l*NR,a.y+dy/l*NR,b.x-dx/l*NR,b.y-dy/l*NR,color,inP?2.5:hov?2:hf?1.8:1.5,inP?'#cc88ff':null);
+      const mx2=(a.x+b.x)/2,my2=(a.y+b.y)/2,ox=-(b.y-a.y)/l*12,oy=(b.x-a.x)/l*12;
+      c.font='10px Share Tech Mono,monospace';c.fillStyle=sat?'#ffcc44':inP?'#ffcc44':hf?'#44cc88':'#2a4a6a';c.textAlign='center';c.textBaseline='middle';c.fillText(`${f}/${w}`,mx2+ox,my2+oy);
+    });
+    if(ed.mode==='addEdge'&&ed.edgeFirst&&ed.hNode&&ed.hNode!==ed.edgeFirst){
+      const a=cfg.nodes[ed.edgeFirst],b=cfg.nodes[ed.hNode];
+      c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.strokeStyle='rgba(200,100,255,.5)';c.lineWidth=1.5;c.setLineDash([5,5]);c.stroke();c.setLineDash([]);
+    }
+    const pnSet=new Set(ffPath);
+    const ns={};Object.keys(cfg.nodes).forEach(n=>{
+      const inP=pnSet.has(n);
+      let fill='#0d1828',stroke='#4a2a6a',glow=null,textColor='#9966cc';
+      if(n===cfg.src){fill='#002828';stroke='#00ccaa';textColor='#00ffdd';glow=inP?'#cc88ff':'#00ccaa';}
+      else if(n===cfg.src2){fill='#1a1a00';stroke='#ccaa00';textColor='#ffdd44';glow=inP?'#cc88ff':'#ccaa00';}
+      else if(inP){fill='#1a0a28';stroke='#cc88ff';glow='#cc88ff';textColor='#ee99ff';}
+      ns[n]={fill,stroke,glow,textColor};
+    });
+    drawNodeBase(c,cfg.nodes,ns,cfg.src,null,cfg.src2,ed.hNode,ed.edgeFirst);
+    labelSrcTgt(c,cfg.nodes,cfg.src,null,cfg.src2);
+  }
+  window.ffDraw=ffDraw; window.ffReset=ffReset;
+  window.ffStep=ffStep; window.ffBack=ffBack;
+  window.ffRunAll=function(){if(ffDone)ffReset();let i=0;const iv=setInterval(()=>{ffStep();i++;if(ffDone||i>200)clearInterval(iv);},180);};
+  window.ffRandom=function(){const n=Math.max(3,Math.min(12,parseInt(document.getElementById('ff-rand-sz').value)||7));const g=randGraphDirected(n,'cv-ff');cfg.nodes=g.nodes;cfg.edges=g.edges;ffReset();};
+  window.ffClear=function(){if(!confirm('Clear?'))return;cfg.nodes={S:{x:100,y:220},T:{x:460,y:220}};cfg.edges=[];ffReset();};
+  window.ffSetMode=function(m){EDITORS[ID].setMode(m);};
+  ffReset();
+})();
+
+// ═══════════════════════════════════════════════════════════════
+//  3. BFS
+// ═══════════════════════════════════════════════════════════════
+(function(){
+  const ID='bfs';
+  const cfg={
+    id:ID,directed:false,negWeights:false,
+    nodes:{A:{x:280,y:50},B:{x:140,y:150},C:{x:420,y:150},D:{x:70,y:270},E:{x:210,y:270},F:{x:350,y:270},G:{x:490,y:270},H:{x:140,y:390},I:{x:420,y:390}},
+    edges:[{u:'A',v:'B'},{u:'A',v:'C'},{u:'B',v:'D'},{u:'B',v:'E'},{u:'C',v:'F'},{u:'C',v:'G'},{u:'D',v:'H'},{u:'E',v:'H'},{u:'F',v:'I'},{u:'G',v:'I'},{u:'E',v:'F'}],
+    src:'A',tgt:null,hasTgt:false,hasSnk:false,
+    onDraw:()=>bfsDraw(),onReset:()=>bfsReset(),
+    onSrcChange:()=>{document.getElementById('bfs-src').textContent=cfg.src;bfsReset();}
+  };
+  CFGS[ID]=cfg;
+  makeSection(ID,'#00dd88',`
+    <div class="panel">
+      <h2 class="h-bfs">// BFS ORDER</h2>
+      <div id="bfs-order" style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:#00dd88;line-height:1.8;min-height:60px"></div>
+      <div class="info c-bfs" id="bfs-info">Set source (right-click) then STEP.</div>
+    </div>
+    <div class="panel">
+      <h2 class="h-bfs">// BFS</h2>
+      <div style="font-size:.72rem;color:#4a6080;font-family:'Share Tech Mono',monospace;margin-bottom:6px">src:<span style="color:#00dd88" id="bfs-src">A</span></div>
+      <div class="controls">
+        <button id="back-btn-bfs" disabled style="opacity:.4" onclick="bfsBack()">← BACK</button>
+        <button style="background:#001a10;border-color:#00dd88;color:#00dd88" onclick="bfsStep()">STEP →</button>
+        <button onclick="bfsRunAll()">RUN ALL</button>
+        <button onclick="bfsReset()">RESET</button>
+      </div>
+    </div>
+    <div class="panel">
+      <h2 class="h-bfs">// ABOUT BFS</h2>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:.61rem;color:#2a5a4a;line-height:1.75">Explores nodes <span style="color:#00dd88">layer by layer</span>.<br>Uses a <b style="color:#44ffaa">queue (FIFO)</b>.<br>Finds shortest path<br>in unweighted graphs.<br><br><b style="color:#5a8a6a">Right-click</b> node → set source<br><b style="color:#5a8a6a">DRAG</b> to reposition</div>
+      <div style="margin-top:8px"><div class="edit-section" style="margin-bottom:4px"><label>RANDOM SIZE</label><input id="bfs-rand-sz" type="number" min="3" max="15" value="9" style="width:55px"></div>
+      <button style="width:100%;font-size:.75rem" onclick="bfsRandom()">⚄ RANDOM</button></div>
+      <div class="controls"><button class="danger" onclick="bfsClear()">CLEAR</button></div>
+    </div>`,
+    `${legendItem('#0d1828','#2a5a9a','unvisited')}${legendItem('#001a10','#00dd88','in queue')}${legendItem('#00aa44','#00ff66','visited')}${legendItem('#002244','#00d4ff','current')}`,
+    [['select','◎ SELECT',true],['drag','⊹ DRAG',false],['addNode','+ NODE',false],['addEdge','⟶ EDGE',false],['delete','✕ DEL',false]]
+  );
+  EDITORS[ID]=makeEditor(cfg);
+
+  let bfsVisited=new Set(),bfsQueue=[],bfsCur=null,bfsDone=false,bfsOrder=[],bfsDepth={},bfsHist=[];
+  function bfsReset(){
+    bfsVisited=new Set();bfsQueue=[];bfsCur=null;bfsDone=false;bfsOrder=[];bfsDepth={};bfsHist=[];
+    if(cfg.nodes[cfg.src]){bfsQueue=[cfg.src];bfsVisited.add(cfg.src);bfsDepth[cfg.src]=0;}
+    document.getElementById('bfs-info').innerHTML='Press <span>STEP →</span> from <span>'+cfg.src+'</span>.';
+    document.getElementById('bfs-order').textContent='';updateBackBtn(ID,bfsHist);bfsDraw();
+  }
+  cfg.onReset=bfsReset;
+
+  function bfsAdj(){
+    const a={};Object.keys(cfg.nodes).forEach(n=>a[n]=[]);
+    cfg.edges.forEach(({u,v})=>{if(a[u]&&a[v]){a[u].push(v);a[v].push(u);}});return a;
+  }
+  function bfsStep(){
+    if(bfsDone)return;
+    saveSnap(bfsHist,{vis:[...bfsVisited],q:[...bfsQueue],cur:bfsCur,done:bfsDone,order:[...bfsOrder],depth:{...bfsDepth},info:document.getElementById('bfs-info').innerHTML,orderHTML:document.getElementById('bfs-order').textContent});
+    updateBackBtn(ID,bfsHist);
+    if(!bfsQueue.length){bfsDone=true;document.getElementById('bfs-info').innerHTML=`<span>BFS complete.</span> Visited: <span>${bfsOrder.join('→')}</span>`;bfsDraw();return;}
+    const node=bfsQueue.shift();bfsCur=node;bfsOrder.push(node);
+    const adj=bfsAdj();
+    const nb=[];
+    (adj[node]||[]).forEach(v=>{if(!bfsVisited.has(v)){bfsVisited.add(v);bfsQueue.push(v);bfsDepth[v]=(bfsDepth[node]||0)+1;nb.push(v);}});
+    document.getElementById('bfs-info').innerHTML=`visit <span>${node}</span> depth=<span>${bfsDepth[node]||0}</span><br>enqueue:[${nb.join(',')||'—'}] queue:[${bfsQueue.join(',')||'∅'}]`;
+    document.getElementById('bfs-order').textContent=bfsOrder.join(' → ');
+    if(!bfsQueue.length){bfsDone=true;document.getElementById('bfs-info').innerHTML=`<span>BFS complete.</span> Order: <span>${bfsOrder.join('→')}</span>`;}
+    bfsDraw();
+  }
+  function bfsBack(){
+    const s=restoreSnap(bfsHist);if(!s)return;
+    bfsVisited=new Set(s.vis);bfsQueue=s.q;bfsCur=s.cur;bfsDone=s.done;bfsOrder=s.order;bfsDepth=s.depth;
+    document.getElementById('bfs-info').innerHTML=s.info;document.getElementById('bfs-order').textContent=s.orderHTML;
+    updateBackBtn(ID,bfsHist);bfsDraw();
+  }
+  function bfsDraw(){
+    const cv=document.getElementById('cv-'+ID);const c=cv.getContext('2d');
+    c.clearRect(0,0,cv.width,cv.height);
+    const ed=EDITORS[ID];
+    // Tree edges (visited)
+    const treeEdges=new Set();
+    drawEdgeBase(c,cfg.nodes,cfg.edges,false,treeEdges,ed.hEdge,'#00dd88');
+    const ns={};Object.keys(cfg.nodes).forEach(n=>{
+      const inQ=bfsQueue.includes(n),isCur=n===bfsCur,isVis=bfsVisited.has(n)&&!inQ&&n!==bfsCur;
+      let fill='#0d1828',stroke='#2a5a9a',glow=null,textColor='#7ab3ff';
+      if(isCur){fill='#003344';stroke='#00d4ff';glow='#00d4ff';textColor='#00d4ff';}
+      else if(inQ){fill='#001a10';stroke='#00dd88';glow='#00dd88';textColor='#00ffaa';}
+      else if(isVis){fill='#001a0a';stroke='#00aa44';textColor='#00cc55';}
+      ns[n]={fill,stroke,glow,textColor};
+    });
+    drawNodeBase(c,cfg.nodes,ns,cfg.src,null,null,ed.hNode,ed.edgeFirst);
+    // Depth labels
+    Object.keys(cfg.nodes).forEach(n=>{
+      if(bfsDepth[n]!==undefined){c.font='9px Share Tech Mono,monospace';c.fillStyle='#2a6a4a';c.textAlign='center';c.fillText('d='+bfsDepth[n],cfg.nodes[n].x,cfg.nodes[n].y+32);}
+    });
+    labelSrcTgt(c,cfg.nodes,cfg.src,null,null);
+  }
+  window.bfsDraw=bfsDraw;window.bfsReset=bfsReset;
+  window.bfsStep=bfsStep;window.bfsBack=bfsBack;
+  window.bfsRunAll=function(){if(bfsDone)bfsReset();let i=0;const iv=setInterval(()=>{bfsStep();i++;if(bfsDone||i>300)clearInterval(iv);},150);};
+  window.bfsRandom=function(){const n=Math.max(3,Math.min(15,parseInt(document.getElementById('bfs-rand-sz').value)||9));const g=randGraphUndirected(n,'cv-bfs');cfg.nodes=g.nodes;const newEdges=g.edges.map(({u,v})=>({u,v}));cfg.edges=newEdges;cfg.src=g.src;document.getElementById('bfs-src').textContent=cfg.src;bfsReset();};
+  window.bfsClear=function(){if(!confirm('Clear?'))return;cfg.nodes={A:{x:280,y:220}};cfg.edges=[];cfg.src='A';document.getElementById('bfs-src').textContent='A';bfsReset();};
+  window.bfsSetMode=function(m){EDITORS[ID].setMode(m);};
+  bfsReset();
+})();
+
+// ═══════════════════════════════════════════════════════════════
+//  4. DFS
+// ═══════════════════════════════════════════════════════════════
+(function(){
+  const ID='dfs';
+  const cfg={
+    id:ID,directed:false,negWeights:false,
+    nodes:{A:{x:280,y:50},B:{x:140,y:150},C:{x:420,y:150},D:{x:70,y:270},E:{x:210,y:270},F:{x:350,y:270},G:{x:490,y:270},H:{x:140,y:390},I:{x:420,y:390}},
+    edges:[{u:'A',v:'B'},{u:'A',v:'C'},{u:'B',v:'D'},{u:'B',v:'E'},{u:'C',v:'F'},{u:'C',v:'G'},{u:'D',v:'H'},{u:'E',v:'H'},{u:'F',v:'I'},{u:'G',v:'I'},{u:'E',v:'F'}],
+    src:'A',tgt:null,hasTgt:false,hasSnk:false,
+    onDraw:()=>dfsDraw(),onReset:()=>dfsReset(),
+    onSrcChange:()=>{document.getElementById('dfs-src').textContent=cfg.src;dfsReset();}
+  };
+  CFGS[ID]=cfg;
+  makeSection(ID,'#ffaa22',`
+    <div class="panel">
+      <h2 class="h-dfs">// DFS ORDER</h2>
+      <div id="dfs-order" style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:#ffaa22;line-height:1.8;min-height:60px"></div>
+      <div class="info c-dfs" id="dfs-info">Set source then STEP.</div>
+    </div>
+    <div class="panel">
+      <h2 class="h-dfs">// DFS</h2>
+      <div style="font-size:.72rem;color:#4a6080;font-family:'Share Tech Mono',monospace;margin-bottom:6px">src:<span style="color:#ffaa22" id="dfs-src">A</span></div>
+      <div class="controls">
+        <button id="back-btn-dfs" disabled style="opacity:.4" onclick="dfsBack()">← BACK</button>
+        <button style="background:#1e1000;border-color:#ffaa22;color:#ffaa22" onclick="dfsStep()">STEP →</button>
+        <button onclick="dfsRunAll()">RUN ALL</button>
+        <button onclick="dfsReset()">RESET</button>
+      </div>
+    </div>
+    <div class="panel">
+      <h2 class="h-dfs">// ABOUT DFS</h2>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:.61rem;color:#4a3a1a;line-height:1.75">Explores as <span style="color:#ffaa22">deep as possible</span><br>before backtracking.<br>Uses a <b style="color:#ffdd44">stack (LIFO)</b>.<br>Good for cycle detection,<br>topological ordering.<br><br><b style="color:#5a8a6a">Right-click</b> → set source</div>
+      <div style="margin-top:8px"><div class="edit-section" style="margin-bottom:4px"><label>RANDOM SIZE</label><input id="dfs-rand-sz" type="number" min="3" max="15" value="9" style="width:55px"></div>
+      <button style="width:100%;font-size:.75rem" onclick="dfsRandom()">⚄ RANDOM</button></div>
+      <div class="controls"><button class="danger" onclick="dfsClear()">CLEAR</button></div>
+    </div>`,
+    `${legendItem('#0d1828','#2a5a9a','unvisited')}${legendItem('#1e1000','#ffaa22','on stack')}${legendItem('#1a0a00','#ff6600','visited')}${legendItem('#002244','#00d4ff','current')}`,
+    [['select','◎ SELECT',true],['drag','⊹ DRAG',false],['addNode','+ NODE',false],['addEdge','⟶ EDGE',false],['delete','✕ DEL',false]]
+  );
+  EDITORS[ID]=makeEditor(cfg);
+
+  let dfsVisited=new Set(),dfsStack=[],dfsCur=null,dfsDone=false,dfsOrder=[],dfsHist=[];
+  function dfsReset(){
+    dfsVisited=new Set();dfsStack=[];dfsCur=null;dfsDone=false;dfsOrder=[];dfsHist=[];
+    if(cfg.nodes[cfg.src])dfsStack=[cfg.src];
+    document.getElementById('dfs-info').innerHTML='Press <span>STEP →</span> from <span>'+cfg.src+'</span>.';
+    document.getElementById('dfs-order').textContent='';updateBackBtn(ID,dfsHist);dfsDraw();
+  }
+  cfg.onReset=dfsReset;
+  function dfsAdj(){const a={};Object.keys(cfg.nodes).forEach(n=>a[n]=[]);cfg.edges.forEach(({u,v})=>{if(a[u]&&a[v]){a[u].push(v);a[v].push(u);}});return a;}
+  function dfsStep(){
+    if(dfsDone)return;
+    saveSnap(dfsHist,{vis:[...dfsVisited],stack:[...dfsStack],cur:dfsCur,done:dfsDone,order:[...dfsOrder],info:document.getElementById('dfs-info').innerHTML,orderHTML:document.getElementById('dfs-order').textContent});
+    updateBackBtn(ID,dfsHist);
+    if(!dfsStack.length){dfsDone=true;document.getElementById('dfs-info').innerHTML=`<span>DFS complete.</span> Order:<span>${dfsOrder.join('→')}</span>`;dfsDraw();return;}
+    const node=dfsStack.pop();
+    if(dfsVisited.has(node)){dfsStep();return;}
+    dfsCur=node;dfsVisited.add(node);dfsOrder.push(node);
+    const adj=dfsAdj();const nb=[];
+    [...(adj[node]||[])].reverse().forEach(v=>{if(!dfsVisited.has(v)){dfsStack.push(v);nb.push(v);}});
+    document.getElementById('dfs-info').innerHTML=`visit <span>${node}</span><br>push:[${nb.join(',')||'—'}] stack:[${[...dfsStack].reverse().join(',')||'∅'}]`;
+    document.getElementById('dfs-order').textContent=dfsOrder.join(' → ');
+    if(!dfsStack.length){dfsDone=true;document.getElementById('dfs-info').innerHTML=`<span>DFS complete.</span> Order:<span>${dfsOrder.join('→')}</span>`;}
+    dfsDraw();
+  }
+  function dfsBack(){
+    const s=restoreSnap(dfsHist);if(!s)return;
+    dfsVisited=new Set(s.vis);dfsStack=s.stack;dfsCur=s.cur;dfsDone=s.done;dfsOrder=s.order;
+    document.getElementById('dfs-info').innerHTML=s.info;document.getElementById('dfs-order').textContent=s.orderHTML;
+    updateBackBtn(ID,dfsHist);dfsDraw();
+  }
+  function dfsDraw(){
+    const cv=document.getElementById('cv-'+ID);const c=cv.getContext('2d');
+    c.clearRect(0,0,cv.width,cv.height);
+    const ed=EDITORS[ID];
+    drawEdgeBase(c,cfg.nodes,cfg.edges,false,new Set(),ed.hEdge,'#ffaa22');
+    const ns={};Object.keys(cfg.nodes).forEach(n=>{
+      const onStk=dfsStack.includes(n)&&!dfsVisited.has(n),isCur=n===dfsCur,isVis=dfsVisited.has(n)&&n!==dfsCur;
+      let fill='#0d1828',stroke='#2a5a9a',glow=null,textColor='#7ab3ff';
+      if(isCur){fill='#003344';stroke='#00d4ff';glow='#00d4ff';textColor='#00d4ff';}
+      else if(onStk){fill='#1e1000';stroke='#ffaa22';glow='#ffaa22';textColor='#ffdd44';}
+      else if(isVis){fill='#1a0a00';stroke='#ff6600';textColor='#ff8833';}
+      ns[n]={fill,stroke,glow,textColor};
+    });
+    drawNodeBase(c,cfg.nodes,ns,cfg.src,null,null,ed.hNode,ed.edgeFirst);
+    labelSrcTgt(c,cfg.nodes,cfg.src,null,null);
+  }
+  window.dfsDraw=dfsDraw;window.dfsReset=dfsReset;
+  window.dfsStep=dfsStep;window.dfsBack=dfsBack;
+  window.dfsRunAll=function(){if(dfsDone)dfsReset();let i=0;const iv=setInterval(()=>{dfsStep();i++;if(dfsDone||i>300)clearInterval(iv);},150);};
+  window.dfsRandom=function(){const n=Math.max(3,Math.min(15,parseInt(document.getElementById('dfs-rand-sz').value)||9));const g=randGraphUndirected(n,'cv-dfs');cfg.nodes=g.nodes;cfg.edges=g.edges.map(({u,v})=>({u,v}));cfg.src=g.src;document.getElementById('dfs-src').textContent=cfg.src;dfsReset();};
+  window.dfsClear=function(){if(!confirm('Clear?'))return;cfg.nodes={A:{x:280,y:220}};cfg.edges=[];cfg.src='A';document.getElementById('dfs-src').textContent='A';dfsReset();};
+  window.dfsSetMode=function(m){EDITORS[ID].setMode(m);};
+  dfsReset();
+})();
+
+// ═══════════════════════════════════════════════════════════════
+//  5. KRUSKAL
+// ═══════════════════════════════════════════════════════════════
+(function(){
+  const ID='kru';
+  const cfg={
+    id:ID,directed:false,negWeights:false,defaultW:4,
+    nodes:{A:{x:95,y:95},B:{x:270,y:55},C:{x:450,y:95},D:{x:55,y:255},E:{x:215,y:235},F:{x:375,y:215},G:{x:490,y:295},H:{x:125,y:375},I:{x:305,y:380},J:{x:465,y:415}},
+    edges:[{u:'A',v:'B',w:4},{u:'A',v:'D',w:2},{u:'B',v:'C',w:5},{u:'B',v:'E',w:3},{u:'C',v:'F',w:4},{u:'C',v:'G',w:7},{u:'D',v:'E',w:6},{u:'D',v:'H',w:5},{u:'E',v:'F',w:2},{u:'E',v:'I',w:8},{u:'F',v:'G',w:3},{u:'F',v:'I',w:4},{u:'G',v:'J',w:5},{u:'H',v:'I',w:3},{u:'I',v:'J',w:6},{u:'B',v:'F',w:9}],
+    src:null,tgt:null,hasTgt:false,hasSnk:false,
+    onDraw:()=>kruDraw(),onReset:()=>kruReset()
+  };
+  CFGS[ID]=cfg;
+  makeSection(ID,'#44ccff',`
+    <div class="panel">
+      <h2 class="h-kru">// MST EDGES</h2>
+      <div id="kru-edges" style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:#44ccff;line-height:1.8;min-height:60px"></div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:#4a7a9a;margin-top:4px">Total cost: <span id="kru-cost" style="color:#44ccff">0</span></div>
+      <div class="info c-kru" id="kru-info">Press STEP to grow the MST.</div>
+    </div>
+    <div class="panel">
+      <h2 class="h-kru">// KRUSKAL</h2>
+      <div class="controls">
+        <button id="back-btn-kru" disabled style="opacity:.4" onclick="kruBack()">← BACK</button>
+        <button style="background:#001828;border-color:#44ccff;color:#44ccff" onclick="kruStep()">STEP →</button>
+        <button onclick="kruRunAll()">RUN ALL</button>
+        <button onclick="kruReset()">RESET</button>
+      </div>
+    </div>
+    <div class="panel">
+      <h2 class="h-kru">// ABOUT KRUSKAL</h2>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:.61rem;color:#1a3a4a;line-height:1.75">Builds a <span style="color:#44ccff">minimum spanning tree</span>.<br>Sorts all edges by weight,<br>adds cheapest edge that<br>doesn't form a <b style="color:#ff6644">cycle</b>.<br>Uses <b style="color:#44ffcc">Union-Find</b> structure.<br><br>Works on <b style="color:#44ccff">undirected</b> graphs.</div>
+      <div style="margin-top:8px"><div class="edit-section" style="margin-bottom:4px"><label>RANDOM SIZE</label><input id="kru-rand-sz" type="number" min="3" max="15" value="10" style="width:55px"></div>
+      <button style="width:100%;font-size:.75rem" onclick="kruRandom()">⚄ RANDOM</button></div>
+      <div class="controls"><button class="danger" onclick="kruClear()">CLEAR</button></div>
+    </div>`,
+    `${legendItem('#0d1828','#2a5a9a','not in MST')}${legendItem('#44ccff','#88eeff','MST edge')}${legendItem('#ff4422','#ff6644','rejected (cycle)')}${legendItem('#ffaa22','#ffcc44','current edge')}`,
+    [['select','◎ SELECT',true],['drag','⊹ DRAG',false],['addNode','+ NODE',false],['addEdge','⟶ EDGE',false],['delete','✕ DEL',false]]
+  );
+  EDITORS[ID]=makeEditor(cfg);
+
+  let kruSorted=[],kruIdx=0,kruMST=new Set(),kruRej=new Set(),kruParent={},kruRank={},kruCost=0,kruDone=false,kruCurIdx=-1,kruHist=[];
+  function find(p,x){if(p[x]!==x)p[x]=find(p,p[x]);return p[x];}
+  function union(p,r,x,y){const rx=find(p,x),ry=find(p,y);if(rx===ry)return false;if(r[rx]<r[ry])p[rx]=ry;else if(r[rx]>r[ry])p[ry]=rx;else{p[ry]=rx;r[rx]++;}return true;}
+  function kruReset(){
+    kruParent={};kruRank={};Object.keys(cfg.nodes).forEach(n=>{kruParent[n]=n;kruRank[n]=0;});
+    kruSorted=[...cfg.edges].sort((a,b)=>a.w-b.w);
+    kruIdx=0;kruMST=new Set();kruRej=new Set();kruCost=0;kruDone=false;kruCurIdx=-1;kruHist=[];
+    document.getElementById('kru-info').innerHTML='Press <span>STEP →</span> to add edges.';
+    document.getElementById('kru-edges').textContent='';document.getElementById('kru-cost').textContent='0';
+    updateBackBtn(ID,kruHist);kruDraw();
+  }
+  cfg.onReset=kruReset;
+  function kruStep(){
+    if(kruDone)return;
+    saveSnap(kruHist,{idx:kruIdx,mst:[...kruMST],rej:[...kruRej],parent:{...kruParent},rank:{...kruRank},cost:kruCost,done:kruDone,curIdx:kruCurIdx,info:document.getElementById('kru-info').innerHTML,edgesHTML:document.getElementById('kru-edges').innerHTML});
+    updateBackBtn(ID,kruHist);
+    if(kruIdx>=kruSorted.length){kruDone=true;document.getElementById('kru-info').innerHTML=`<span>MST complete.</span> Cost:<span>${kruCost}</span>`;kruDraw();return;}
+    const e=kruSorted[kruIdx];kruCurIdx=kruIdx;kruIdx++;
+    const p=kruParent,r=kruRank;
+    if(union(p,r,e.u,e.v)){
+      kruMST.add(e.u+'-'+e.v);kruMST.add(e.v+'-'+e.u);kruCost+=e.w;
+      document.getElementById('kru-info').innerHTML=`<span>ADD</span> ${e.u}-${e.v} w=<span>${e.w}</span><br>No cycle. MST cost:<span>${kruCost}</span>`;
+      document.getElementById('kru-edges').innerHTML+='<div>'+e.u+'−'+e.v+' ('+e.w+')</div>';
+    } else {
+      kruRej.add(e.u+'-'+e.v);kruRej.add(e.v+'-'+e.u);
+      document.getElementById('kru-info').innerHTML=`<span style="color:#ff6644">SKIP</span> ${e.u}-${e.v} w=${e.w}<br>Would form cycle.`;
+    }
+    document.getElementById('kru-cost').textContent=kruCost;
+    const needed=Object.keys(cfg.nodes).length-1;
+    if(kruMST.size/2>=needed){kruDone=true;document.getElementById('kru-info').innerHTML=`<span>MST complete!</span> Cost:<span>${kruCost}</span>`;}
+    kruDraw();
+  }
+  function kruBack(){
+    const s=restoreSnap(kruHist);if(!s)return;
+    kruIdx=s.idx;kruMST=new Set(s.mst);kruRej=new Set(s.rej);kruParent=s.parent;kruRank=s.rank;kruCost=s.cost;kruDone=s.done;kruCurIdx=s.curIdx;
+    document.getElementById('kru-info').innerHTML=s.info;document.getElementById('kru-edges').innerHTML=s.edgesHTML;document.getElementById('kru-cost').textContent=kruCost;
+    updateBackBtn(ID,kruHist);kruDraw();
+  }
+  function kruDraw(){
+    const cv=document.getElementById('cv-'+ID);const c=cv.getContext('2d');
+    c.clearRect(0,0,cv.width,cv.height);
+    const ed=EDITORS[ID];
+    cfg.edges.forEach(({u,v,w},i)=>{
+      const a=cfg.nodes[u],b=cfg.nodes[v];if(!a||!b)return;
+      const key=u+'-'+v,keyR=v+'-'+u;
+      const isMST=kruMST.has(key),isRej=kruRej.has(key),isCur=kruCurIdx>=0&&kruCurIdx<kruSorted.length&&kruSorted[kruCurIdx]&&(kruSorted[kruCurIdx].u===u&&kruSorted[kruCurIdx].v===v||kruSorted[kruCurIdx].u===v&&kruSorted[kruCurIdx].v===u);
+      const isHov=ed.hEdge===i;
+      const color=isMST?'#44ccff':isRej?'#ff4422':isCur?'#ffaa22':isHov?'#ff5544':'#1a2a40';
+      const lw=isMST?2.5:isCur?2:isHov?2:1.5;
+      c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.strokeStyle=color;c.lineWidth=lw;c.shadowColor=isMST||isCur?color:'transparent';c.shadowBlur=isMST||isCur?8:0;c.stroke();c.shadowBlur=0;
+      const mx=(a.x+b.x)/2,my=(a.y+b.y)/2,ox=-(b.y-a.y)/Math.sqrt((b.x-a.x)**2+(b.y-a.y)**2||1)*11,oy=(b.x-a.x)/Math.sqrt((b.x-a.x)**2+(b.y-a.y)**2||1)*11;
+      c.font='10px Share Tech Mono,monospace';c.fillStyle=isMST?'#88eeff':isRej?'#ff6655':isCur?'#ffcc44':'#2a4a6a';c.textAlign='center';c.textBaseline='middle';c.fillText(w,mx+ox,my+oy);
+    });
+    const ns={};
+    const mstNodes=new Set();kruMST.forEach(k=>{const[u,v]=k.split('-');mstNodes.add(u);mstNodes.add(v);});
+    Object.keys(cfg.nodes).forEach(n=>{
+      const inMST=mstNodes.has(n);
+      ns[n]={fill:inMST?'#001828':'#0d1828',stroke:inMST?'#44ccff':'#2a5a9a',glow:inMST?'#44ccff':null,textColor:inMST?'#88eeff':'#7ab3ff'};
+    });
+    drawNodeBase(c,cfg.nodes,ns,null,null,null,ed.hNode,ed.edgeFirst);
+  }
+  window.kruDraw=kruDraw;window.kruReset=kruReset;
+  window.kruStep=kruStep;window.kruBack=kruBack;
+  window.kruRunAll=function(){if(kruDone)kruReset();let i=0;const iv=setInterval(()=>{kruStep();i++;if(kruDone||i>300)clearInterval(iv);},130);};
+  window.kruRandom=function(){const n=Math.max(3,Math.min(15,parseInt(document.getElementById('kru-rand-sz').value)||10));const g=randGraphUndirected(n,'cv-kru');cfg.nodes=g.nodes;cfg.edges=g.edges;kruReset();};
+  window.kruClear=function(){if(!confirm('Clear?'))return;cfg.nodes={A:{x:280,y:220}};cfg.edges=[];kruReset();};
+  window.kruSetMode=function(m){EDITORS[ID].setMode(m);};
+  kruReset();
+})();
+
+// ═══════════════════════════════════════════════════════════════
+//  6. PRIM
+// ═══════════════════════════════════════════════════════════════
+(function(){
+  const ID='pri';
+  const cfg={
+    id:ID,directed:false,negWeights:false,defaultW:4,
+    nodes:{A:{x:95,y:95},B:{x:270,y:55},C:{x:450,y:95},D:{x:55,y:255},E:{x:215,y:235},F:{x:375,y:215},G:{x:490,y:295},H:{x:125,y:375},I:{x:305,y:380},J:{x:465,y:415}},
+    edges:[{u:'A',v:'B',w:4},{u:'A',v:'D',w:2},{u:'B',v:'C',w:5},{u:'B',v:'E',w:3},{u:'C',v:'F',w:4},{u:'C',v:'G',w:7},{u:'D',v:'E',w:6},{u:'D',v:'H',w:5},{u:'E',v:'F',w:2},{u:'E',v:'I',w:8},{u:'F',v:'G',w:3},{u:'F',v:'I',w:4},{u:'G',v:'J',w:5},{u:'H',v:'I',w:3},{u:'I',v:'J',w:6},{u:'B',v:'F',w:9}],
+    src:'A',tgt:null,hasTgt:false,hasSnk:false,
+    onDraw:()=>priDraw(),onReset:()=>priReset(),
+    onSrcChange:()=>{document.getElementById('pri-src').textContent=cfg.src;priReset();}
+  };
+  CFGS[ID]=cfg;
+  makeSection(ID,'#88ff44',`
+    <div class="panel">
+      <h2 class="h-pri">// MST EDGES</h2>
+      <div id="pri-edges" style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:#88ff44;line-height:1.8;min-height:60px"></div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:#4a7a9a;margin-top:4px">Total cost: <span id="pri-cost" style="color:#88ff44">0</span></div>
+      <div class="info c-pri" id="pri-info">Press STEP to grow the MST.</div>
+    </div>
+    <div class="panel">
+      <h2 class="h-pri">// PRIM</h2>
+      <div style="font-size:.72rem;color:#4a6080;font-family:'Share Tech Mono',monospace;margin-bottom:6px">src:<span style="color:#88ff44" id="pri-src">A</span></div>
+      <div class="controls">
+        <button id="back-btn-pri" disabled style="opacity:.4" onclick="priBack()">← BACK</button>
+        <button style="background:#081800;border-color:#88ff44;color:#88ff44" onclick="priStep()">STEP →</button>
+        <button onclick="priRunAll()">RUN ALL</button>
+        <button onclick="priReset()">RESET</button>
+      </div>
+    </div>
+    <div class="panel">
+      <h2 class="h-pri">// ABOUT PRIM</h2>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:.61rem;color:#1a3a1a;line-height:1.75">Builds MST by <span style="color:#88ff44">growing a tree</span><br>from a start node.<br>At each step picks the<br><b style="color:#ccff88">cheapest edge</b> connecting<br>tree to non-tree node.<br><br>Works like Dijkstra<br>but tracks edge cost.</div>
+      <div style="margin-top:8px"><div class="edit-section" style="margin-bottom:4px"><label>RANDOM SIZE</label><input id="pri-rand-sz" type="number" min="3" max="15" value="10" style="width:55px"></div>
+      <button style="width:100%;font-size:.75rem" onclick="priRandom()">⚄ RANDOM</button></div>
+      <div class="controls"><button class="danger" onclick="priClear()">CLEAR</button></div>
+    </div>`,
+    `${legendItem('#0d1828','#2a5a9a','not in MST')}${legendItem('#88ff44','#ccff88','MST edge')}${legendItem('#ffaa22','#ffcc44','candidate edge')}${legendItem('#002244','#00d4ff','current node')}`,
+    [['select','◎ SELECT',true],['drag','⊹ DRAG',false],['addNode','+ NODE',false],['addEdge','⟶ EDGE',false],['delete','✕ DEL',false]]
+  );
+  EDITORS[ID]=makeEditor(cfg);
+
+  let priInMST=new Set(),priMSTEdges=new Set(),priKey={},priParent={},priCur=null,priDone=false,priCost=0,priHist=[];
+  function priAdj(){const a={};Object.keys(cfg.nodes).forEach(n=>a[n]=[]);cfg.edges.forEach(({u,v,w})=>{if(a[u]&&a[v]){a[u].push({n:v,w});a[v].push({n:u,w});}});return a;}
+  function priReset(){
+    priInMST=new Set();priMSTEdges=new Set();priKey={};priParent={};priCur=null;priDone=false;priCost=0;priHist=[];
+    Object.keys(cfg.nodes).forEach(n=>{priKey[n]=Infinity;priParent[n]=null;});
+    if(cfg.nodes[cfg.src]){priKey[cfg.src]=0;}
+    document.getElementById('pri-info').innerHTML='Press <span>STEP →</span> from <span>'+cfg.src+'</span>.';
+    document.getElementById('pri-edges').textContent='';document.getElementById('pri-cost').textContent='0';
+    updateBackBtn(ID,priHist);priDraw();
+  }
+  cfg.onReset=priReset;
+  function priStep(){
+    if(priDone)return;
+    saveSnap(priHist,{inMST:[...priInMST],mstEdges:[...priMSTEdges],key:{...priKey},parent:{...priParent},cur:priCur,done:priDone,cost:priCost,info:document.getElementById('pri-info').innerHTML,edgesHTML:document.getElementById('pri-edges').innerHTML});
+    updateBackBtn(ID,priHist);
+    // Pick min key not in MST
+    const notIn=Object.keys(cfg.nodes).filter(n=>!priInMST.has(n));
+    if(!notIn.length){priDone=true;document.getElementById('pri-info').innerHTML=`<span>MST complete!</span> Cost:<span>${priCost}</span>`;priDraw();return;}
+    const u=notIn.reduce((a,b)=>priKey[a]<=priKey[b]?a:b);
+    if(priKey[u]===Infinity){priDone=true;document.getElementById('pri-info').innerHTML='<span>Graph is disconnected.</span>';priDraw();return;}
+    priInMST.add(u);priCur=u;
+    if(priParent[u]){priMSTEdges.add(u+'-'+priParent[u]);priMSTEdges.add(priParent[u]+'-'+u);priCost+=priKey[u];document.getElementById('pri-edges').innerHTML+=`<div>${priParent[u]}−${u} (${priKey[u]})</div>`;}
+    document.getElementById('pri-cost').textContent=priCost;
+    const adj=priAdj();
+    const relaxed=[];
+    (adj[u]||[]).forEach(({n:v,w})=>{if(!priInMST.has(v)&&w<priKey[v]){priKey[v]=w;priParent[v]=u;relaxed.push(v);}});
+    document.getElementById('pri-info').innerHTML=`add <span>${u}</span> key=<span>${priKey[u]}</span><br>relax:[${relaxed.join(',')||'—'}]`;
+    if(priInMST.size===Object.keys(cfg.nodes).length){priDone=true;document.getElementById('pri-info').innerHTML=`<span>MST complete!</span> Cost:<span>${priCost}</span>`;}
+    priDraw();
+  }
+  function priBack(){
+    const s=restoreSnap(priHist);if(!s)return;
+    priInMST=new Set(s.inMST);priMSTEdges=new Set(s.mstEdges);priKey=s.key;priParent=s.parent;priCur=s.cur;priDone=s.done;priCost=s.cost;
+    document.getElementById('pri-info').innerHTML=s.info;document.getElementById('pri-edges').innerHTML=s.edgesHTML;document.getElementById('pri-cost').textContent=priCost;
+    updateBackBtn(ID,priHist);priDraw();
+  }
+  function priDraw(){
+    const cv=document.getElementById('cv-'+ID);const c=cv.getContext('2d');
+    c.clearRect(0,0,cv.width,cv.height);
+    const ed=EDITORS[ID];
+    cfg.edges.forEach(({u,v,w},i)=>{
+      const a=cfg.nodes[u],b=cfg.nodes[v];if(!a||!b)return;
+      const key=u+'-'+v,keyR=v+'-'+u;
+      const isMST=priMSTEdges.has(key);
+      // Candidate: connects MST to non-MST
+      const isCand=(priInMST.has(u)&&!priInMST.has(v))||(priInMST.has(v)&&!priInMST.has(u));
+      const isHov=ed.hEdge===i;
+      const color=isMST?'#88ff44':isCand?'#ffaa22':isHov?'#ff5544':'#1a2a40';
+      c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.strokeStyle=color;c.lineWidth=isMST?2.5:isCand?1.8:isHov?2:1.5;c.shadowColor=isMST?color:'transparent';c.shadowBlur=isMST?8:0;c.stroke();c.shadowBlur=0;
+      const mx=(a.x+b.x)/2,my=(a.y+b.y)/2,ox=-(b.y-a.y)/Math.sqrt((b.x-a.x)**2+(b.y-a.y)**2||1)*11,oy=(b.x-a.x)/Math.sqrt((b.x-a.x)**2+(b.y-a.y)**2||1)*11;
+      c.font='10px Share Tech Mono,monospace';c.fillStyle=isMST?'#ccff88':isCand?'#ffcc44':'#2a4a6a';c.textAlign='center';c.textBaseline='middle';c.fillText(w,mx+ox,my+oy);
+    });
+    const ns={};Object.keys(cfg.nodes).forEach(n=>{
+      const inMST=priInMST.has(n),isCur=n===priCur;
+      let fill='#0d1828',stroke='#2a5a9a',glow=null,textColor='#7ab3ff';
+      if(isCur){fill='#003344';stroke='#00d4ff';glow='#00d4ff';textColor='#00d4ff';}
+      else if(inMST){fill='#081800';stroke='#88ff44';glow='#88ff44';textColor='#ccff88';}
+      ns[n]={fill,stroke,glow,textColor};
+    });
+    drawNodeBase(c,cfg.nodes,ns,cfg.src,null,null,ed.hNode,ed.edgeFirst);
+    Object.keys(cfg.nodes).forEach(n=>{if(!priInMST.has(n)&&priKey[n]!==Infinity){c.font='9px Share Tech Mono,monospace';c.fillStyle='#4a6a2a';c.textAlign='center';c.fillText('k='+priKey[n],cfg.nodes[n].x,cfg.nodes[n].y+32);}});
+    labelSrcTgt(c,cfg.nodes,cfg.src,null,null);
+  }
+  window.priDraw=priDraw;window.priReset=priReset;
+  window.priStep=priStep;window.priBack=priBack;
+  window.priRunAll=function(){if(priDone)priReset();let i=0;const iv=setInterval(()=>{priStep();i++;if(priDone||i>300)clearInterval(iv);},130);};
+  window.priRandom=function(){const n=Math.max(3,Math.min(15,parseInt(document.getElementById('pri-rand-sz').value)||10));const g=randGraphUndirected(n,'cv-pri');cfg.nodes=g.nodes;cfg.edges=g.edges;cfg.src=g.src;document.getElementById('pri-src').textContent=cfg.src;priReset();};
+  window.priClear=function(){if(!confirm('Clear?'))return;cfg.nodes={A:{x:280,y:220}};cfg.edges=[];cfg.src='A';document.getElementById('pri-src').textContent='A';priReset();};
+  window.priSetMode=function(m){EDITORS[ID].setMode(m);};
+  priReset();
+})();
+
+// ═══════════════════════════════════════════════════════════════
+//  7. BELLMAN-FORD
+// ═══════════════════════════════════════════════════════════════
+(function(){
+  const ID='bfn';
+  const cfg={
+    id:ID,directed:true,negWeights:true,defaultW:3,
+    nodes:{S:{x:55,y:220},A:{x:190,y:80},B:{x:190,y:360},C:{x:340,y:150},D:{x:340,y:290},T:{x:510,y:220}},
+    edges:[{u:'S',v:'A',w:6},{u:'S',v:'B',w:7},{u:'A',v:'C',w:5},{u:'A',v:'D',w:-4},{u:'B',v:'A',w:8},{u:'B',v:'D',w:9},{u:'C',v:'T',w:-3},{u:'D',v:'C',w:7},{u:'D',v:'T',w:2},{u:'B',v:'C',w:-2}],
+    src:'S',tgt:'T',hasTgt:true,hasSnk:false,
+    onDraw:()=>bfnDraw(),onReset:()=>bfnReset(),
+    onSrcChange:()=>{document.getElementById('bfn-src').textContent=cfg.src;bfnReset();},
+    onTgtChange:()=>{document.getElementById('bfn-tgt').textContent=cfg.tgt;bfnReset();}
+  };
+  CFGS[ID]=cfg;
+  makeSection(ID,'#ff6666',`
+    <div class="panel">
+      <h2 class="h-bfn">// DISTANCES</h2>
+      <table class="gen-table" id="bfn-table"></table>
+      <div class="info c-bfn" id="bfn-info">Press STEP to relax edges.</div>
+    </div>
+    <div class="panel">
+      <h2 class="h-bfn">// BELLMAN-FORD</h2>
+      <div style="font-size:.72rem;color:#4a6080;font-family:'Share Tech Mono',monospace;margin-bottom:6px">src:<span style="color:#ff6666" id="bfn-src">S</span> tgt:<span style="color:#ffcc44" id="bfn-tgt">T</span></div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:.68rem;color:#4a3a3a;margin-bottom:5px">pass:<span id="bfn-pass" style="color:#ff6666">0</span>/<span id="bfn-total">?</span></div>
+      <div class="controls">
+        <button id="back-btn-bfn" disabled style="opacity:.4" onclick="bfnBack()">← BACK</button>
+        <button style="background:#200808;border-color:#ff6666;color:#ff6666" onclick="bfnStep()">STEP →</button>
+        <button onclick="bfnRunAll()">RUN ALL</button>
+        <button onclick="bfnReset()">RESET</button>
+      </div>
+    </div>
+    <div class="panel">
+      <h2 class="h-bfn">// ABOUT</h2>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:.61rem;color:#3a1a1a;line-height:1.75">Like Dijkstra but handles<br><span style="color:#ff6666">negative weights</span>.<br>Relaxes ALL edges<br><b style="color:#ff8888">|V|-1 times</b>.<br>Extra pass detects<br><b style="color:#ffcc44">negative cycles</b>.<br><br>Works on <b style="color:#ff6666">directed</b> graphs.<br>Dbl-click edge to edit weight<br>(negative weights allowed).</div>
+      <div style="margin-top:8px"><div class="edit-section" style="margin-bottom:4px"><label>RANDOM SIZE</label><input id="bfn-rand-sz" type="number" min="3" max="12" value="6" style="width:55px"></div>
+      <button style="width:100%;font-size:.75rem" onclick="bfnRandom()">⚄ RANDOM</button></div>
+      <div class="controls"><button class="danger" onclick="bfnClear()">CLEAR</button></div>
+    </div>`,
+    `${legendItem('#0d1828','#2a5a9a','unrelaxed')}${legendItem('#200808','#ff6666','relaxed')}${legendItem('#ff6622','#ff8844','shortest path')}${legendItem('#330000','#ff4444','neg cycle')}`,
+    [['select','◎ SELECT',true],['drag','⊹ DRAG',false],['addNode','+ NODE',false],['addEdge','⟶ EDGE',false],['delete','✕ DEL',false]]
+  );
+  EDITORS[ID]=makeEditor(cfg);
+
+  let bfnDist={},bfnPrev={},bfnPass=0,bfnEdgeIdx=0,bfnDone=false,bfnNegCycle=false,bfnRelaxed=new Set(),bfnHist=[];
+  function bfnReset(){
+    bfnDist={};bfnPrev={};bfnPass=0;bfnEdgeIdx=0;bfnDone=false;bfnNegCycle=false;bfnRelaxed=new Set();bfnHist=[];
+    Object.keys(cfg.nodes).forEach(n=>{bfnDist[n]=Infinity;bfnPrev[n]=null;});
+    if(cfg.nodes[cfg.src])bfnDist[cfg.src]=0;
+    const V=Object.keys(cfg.nodes).length;
+    document.getElementById('bfn-info').innerHTML='Press <span>STEP →</span> from <span>'+cfg.src+'</span>.';
+    document.getElementById('bfn-pass').textContent='0';document.getElementById('bfn-total').textContent=V-1;
+    updateBackBtn(ID,bfnHist);bfnTable();bfnDraw();
+  }
+  cfg.onReset=bfnReset;
+  function bfnTable(){
+    document.getElementById('bfn-table').innerHTML=Object.keys(cfg.nodes).map(n=>{
+      const cls=bfnRelaxed.has(n)?'vis':'';
+      const neg=bfnNegCycle&&bfnDist[n]===-Infinity;
+      return `<tr class="${neg?'neg':cls}"><td>${n}</td><td>${bfnDist[n]===Infinity?'∞':bfnDist[n]}${bfnPrev[n]?'←'+bfnPrev[n]:''}</td></tr>`;
+    }).join('');
+  }
+  function bfnStep(){
+    if(bfnDone)return;
+    const V=Object.keys(cfg.nodes).length;
+    saveSnap(bfnHist,{dist:{...bfnDist},prev:{...bfnPrev},pass:bfnPass,edgeIdx:bfnEdgeIdx,done:bfnDone,negCycle:bfnNegCycle,relaxed:[...bfnRelaxed],info:document.getElementById('bfn-info').innerHTML});
+    updateBackBtn(ID,bfnHist);
+    if(bfnPass>=V){// Extra pass: negative cycle detection
+      let nc=false;
+      cfg.edges.forEach(({u,v,w})=>{if(bfnDist[u]!==Infinity&&bfnDist[u]+w<bfnDist[v]){bfnDist[v]=-Infinity;nc=true;}});
+      bfnNegCycle=nc;bfnDone=true;
+      document.getElementById('bfn-info').innerHTML=nc?'<span style="color:#ff4444">NEGATIVE CYCLE detected!</span>':bfnDist[cfg.tgt]===Infinity?`No path to <span>${cfg.tgt}</span>.`:`<span>${cfg.tgt}</span> cost:<span>${bfnDist[cfg.tgt]}</span><br><span>${bfnGetPath().join('→')}</span>`;
+      bfnTable();bfnDraw();return;
+    }
+    // Relax one edge
+    if(bfnEdgeIdx<cfg.edges.length){
+      const {u,v,w}=cfg.edges[bfnEdgeIdx];
+      if(bfnDist[u]!==Infinity&&bfnDist[u]+w<bfnDist[v]){
+        bfnDist[v]=bfnDist[u]+w;bfnPrev[v]=u;bfnRelaxed.add(v);
+        document.getElementById('bfn-info').innerHTML=`pass <span>${bfnPass+1}</span> relax <span>${u}→${v}</span><br>new dist[${v}]=<span>${bfnDist[v]}</span>`;
+      } else {
+        document.getElementById('bfn-info').innerHTML=`pass <span>${bfnPass+1}</span> check <span>${u}→${v}</span><br>no improvement`;
+      }
+      bfnEdgeIdx++;
+    }
+    if(bfnEdgeIdx>=cfg.edges.length){bfnPass++;bfnEdgeIdx=0;document.getElementById('bfn-pass').textContent=bfnPass;}
+    if(bfnPass>=V-1&&bfnEdgeIdx===0){
+      // Done with V-1 passes, next step does neg cycle check
+    }
+    bfnTable();bfnDraw();
+  }
+  function bfnBack(){
+    const s=restoreSnap(bfnHist);if(!s)return;
+    bfnDist=s.dist;bfnPrev=s.prev;bfnPass=s.pass;bfnEdgeIdx=s.edgeIdx;bfnDone=s.done;bfnNegCycle=s.negCycle;bfnRelaxed=new Set(s.relaxed);
+    document.getElementById('bfn-info').innerHTML=s.info;document.getElementById('bfn-pass').textContent=bfnPass;
+    updateBackBtn(ID,bfnHist);bfnTable();bfnDraw();
+  }
+  function bfnGetPath(){const p=[];let n=cfg.tgt;while(n){p.unshift(n);n=bfnPrev[n];}return p;}
+  function bfnGetPathSet(){
+    if(!bfnDone||bfnDist[cfg.tgt]===Infinity||bfnNegCycle)return new Set();
+    const path=bfnGetPath(),s=new Set();for(let i=0;i<path.length-1;i++)s.add(path[i]+'-'+path[i+1]);return s;
+  }
+  function bfnDraw(){
+    const cv=document.getElementById('cv-'+ID);const c=cv.getContext('2d');
+    c.clearRect(0,0,cv.width,cv.height);
+    const ps=bfnGetPathSet();
+    const curEdge=(!bfnDone&&bfnEdgeIdx>0&&bfnEdgeIdx<=cfg.edges.length)?cfg.edges[bfnEdgeIdx-1]:null;
+    const ed=EDITORS[ID];
+    cfg.edges.forEach(({u,v,w},i)=>{
+      const a=cfg.nodes[u],b=cfg.nodes[v];if(!a||!b)return;
+      const isPath=ps.has(u+'-'+v);
+      const isCur=curEdge&&curEdge.u===u&&curEdge.v===v;
+      const isHov=ed.hEdge===i;
+      const color=isPath?'#ff6622':isCur?'#ff6666':isHov?'#ff5544':'#1a2a40';
+      const dx=b.x-a.x,dy=b.y-a.y,l=Math.sqrt(dx*dx+dy*dy)||1;
+      drawArrow(c,a.x+dx/l*NR,a.y+dy/l*NR,b.x-dx/l*NR,b.y-dy/l*NR,color,isPath||isCur?2.5:1.5,isPath||isCur?color:null);
+      const mx=(a.x+b.x)/2,my=(a.y+b.y)/2,ox=-(b.y-a.y)/l*11,oy=(b.x-a.x)/l*11;
+      c.font='10px Share Tech Mono,monospace';c.fillStyle=isPath?'#ff8844':w<0?'#ff6666':isCur?'#ff9966':'#2a4a6a';c.textAlign='center';c.textBaseline='middle';c.fillText(w,mx+ox,my+oy);
+    });
+    const pathNodes=bfnDone&&bfnDist[cfg.tgt]!==Infinity&&!bfnNegCycle?new Set(bfnGetPath()):new Set();
+    const ns={};Object.keys(cfg.nodes).forEach(n=>{
+      const rel=bfnRelaxed.has(n),isPath=pathNodes.has(n);
+      let fill='#0d1828',stroke='#2a5a9a',glow=null,textColor='#7ab3ff';
+      if(bfnNegCycle&&bfnDist[n]===-Infinity){fill='#200000';stroke='#ff4444';glow='#ff4444';textColor='#ff4444';}
+      else if(isPath&&bfnDone){fill='#331500';stroke='#ff6622';glow='#ff6622';textColor='#ff8844';}
+      else if(rel){fill='#200808';stroke='#ff6666';textColor='#ff8888';}
+      ns[n]={fill,stroke,glow,textColor};
+    });
+    drawNodeBase(c,cfg.nodes,ns,cfg.src,cfg.tgt,null,ed.hNode,ed.edgeFirst);
+    Object.keys(cfg.nodes).forEach(n=>{if(bfnDist[n]!==Infinity&&bfnDist[n]!==-Infinity){c.font='9px Share Tech Mono,monospace';c.fillStyle='#6a3a3a';c.textAlign='center';c.fillText(bfnDist[n],cfg.nodes[n].x,cfg.nodes[n].y+32);}});
+    labelSrcTgt(c,cfg.nodes,cfg.src,cfg.tgt,null);
+  }
+  window.bfnDraw=bfnDraw;window.bfnReset=bfnReset;
+  window.bfnStep=bfnStep;window.bfnBack=bfnBack;
+  window.bfnRunAll=function(){if(bfnDone)bfnReset();let i=0;const iv=setInterval(()=>{bfnStep();i++;if(bfnDone||i>500)clearInterval(iv);},90);};
+  window.bfnRandom=function(){
+    const n=Math.max(3,Math.min(12,parseInt(document.getElementById('bfn-rand-sz').value)||6));
+    const g=randGraphDirected(n,'cv-bfn');
+    g.edges=g.edges.map(e=>({...e,w:Math.random()<.2?-(1+Math.floor(Math.random()*4)):e.w}));
+    cfg.nodes=g.nodes;cfg.edges=g.edges;cfg.src='S';cfg.tgt='T';
+    document.getElementById('bfn-src').textContent='S';document.getElementById('bfn-tgt').textContent='T';bfnReset();
+  };
+  window.bfnClear=function(){if(!confirm('Clear?'))return;cfg.nodes={S:{x:100,y:220},T:{x:460,y:220}};cfg.edges=[];cfg.src='S';cfg.tgt='T';document.getElementById('bfn-src').textContent='S';document.getElementById('bfn-tgt').textContent='T';bfnReset();};
+  window.bfnSetMode=function(m){EDITORS[ID].setMode(m);};
+  bfnReset();
+})();
+
+// ═══════════════════════════════════════════════════════════════
+//  8. TOPOLOGICAL SORT
+// ═══════════════════════════════════════════════════════════════
+(function(){
+  const ID='top';
+  const cfg={
+    id:ID,directed:true,negWeights:false,
+    nodes:{A:{x:55,y:220},B:{x:170,y:100},C:{x:170,y:340},D:{x:310,y:100},E:{x:310,y:220},F:{x:310,y:340},G:{x:450,y:160},H:{x:450,y:290},I:{x:530,y:220}},
+    edges:[{u:'A',v:'B'},{u:'A',v:'C'},{u:'B',v:'D'},{u:'B',v:'E'},{u:'C',v:'E'},{u:'C',v:'F'},{u:'D',v:'G'},{u:'E',v:'G'},{u:'E',v:'H'},{u:'F',v:'H'},{u:'G',v:'I'},{u:'H',v:'I'}],
+    src:null,tgt:null,hasTgt:false,hasSnk:false,
+    onDraw:()=>topDraw(),onReset:()=>topReset()
+  };
+  CFGS[ID]=cfg;
+  makeSection(ID,'#dd88ff',`
+    <div class="panel">
+      <h2 class="h-top">// TOPO ORDER</h2>
+      <div id="top-order" style="font-family:'Share Tech Mono',monospace;font-size:.7rem;color:#dd88ff;line-height:1.8;min-height:60px"></div>
+      <div id="top-indeg" style="font-family:'Share Tech Mono',monospace;font-size:.65rem;color:#5a4a7a;margin-top:4px;line-height:1.6"></div>
+      <div class="info c-top" id="top-info">Press STEP to run Kahn's algorithm.</div>
+    </div>
+    <div class="panel">
+      <h2 class="h-top">// TOPO SORT</h2>
+      <div class="controls">
+        <button id="back-btn-top" disabled style="opacity:.4" onclick="topBack()">← BACK</button>
+        <button style="background:#160020;border-color:#dd88ff;color:#dd88ff" onclick="topStep()">STEP →</button>
+        <button onclick="topRunAll()">RUN ALL</button>
+        <button onclick="topReset()">RESET</button>
+      </div>
+    </div>
+    <div class="panel">
+      <h2 class="h-top">// ABOUT</h2>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:.61rem;color:#2a1a3a;line-height:1.75">Orders nodes of a <span style="color:#dd88ff">DAG</span><br>so every edge points<br>forward in the order.<br><br>Uses <b style="color:#aa66ff">Kahn's algorithm</b>:<br>Repeatedly pick nodes<br>with <b style="color:#ffcc44">in-degree = 0</b>,<br>remove their edges.<br><br>Detects <b style="color:#ff6644">cycles</b> — if not<br>all nodes are sorted,<br>a cycle exists.</div>
+      <div style="margin-top:8px"><div class="edit-section" style="margin-bottom:4px"><label>RANDOM SIZE</label><input id="top-rand-sz" type="number" min="3" max="12" value="9" style="width:55px"></div>
+      <button style="width:100%;font-size:.75rem" onclick="topRandom()">⚄ RANDOM DAG</button></div>
+      <div class="controls"><button class="danger" onclick="topClear()">CLEAR</button></div>
+    </div>`,
+    `${legendItem('#0d1828','#2a5a9a','not processed')}${legendItem('#160020','#dd88ff','in queue (in-deg 0)')}${legendItem('#1a0a28','#aa66ff','processed')}${legendItem('#002244','#00d4ff','current')}`,
+    [['select','◎ SELECT',true],['drag','⊹ DRAG',false],['addNode','+ NODE',false],['addEdge','⟶ EDGE',false],['delete','✕ DEL',false]]
+  );
+  EDITORS[ID]=makeEditor(cfg);
+
+  let topInDeg={},topQueue=[],topOrder=[],topProcessed=new Set(),topCur=null,topDone=false,topHist=[];
+  function topReset(){
+    topInDeg={};topQueue=[];topOrder=[];topProcessed=new Set();topCur=null;topDone=false;topHist=[];
+    Object.keys(cfg.nodes).forEach(n=>topInDeg[n]=0);
+    cfg.edges.forEach(({v})=>{if(topInDeg[v]!==undefined)topInDeg[v]++;});
+    topQueue=Object.keys(cfg.nodes).filter(n=>topInDeg[n]===0);
+    document.getElementById('top-info').innerHTML='Press <span>STEP →</span> (Kahn\'s algorithm).';
+    document.getElementById('top-order').textContent='';
+    topShowIndeg();updateBackBtn(ID,topHist);topDraw();
+  }
+  cfg.onReset=topReset;
+  function topShowIndeg(){document.getElementById('top-indeg').innerHTML=Object.keys(cfg.nodes).map(n=>`${n}:${topInDeg[n]}`).join(' ');}
+  function topStep(){
+    if(topDone)return;
+    saveSnap(topHist,{indeg:{...topInDeg},q:[...topQueue],order:[...topOrder],proc:[...topProcessed],cur:topCur,done:topDone,info:document.getElementById('top-info').innerHTML,orderHTML:document.getElementById('top-order').textContent,indegHTML:document.getElementById('top-indeg').innerHTML});
+    updateBackBtn(ID,topHist);
+    if(!topQueue.length){topDone=true;const hasCycle=topOrder.length<Object.keys(cfg.nodes).length;document.getElementById('top-info').innerHTML=hasCycle?'<span style="color:#ff6644">CYCLE detected!</span> Not a valid DAG.':`<span>Done!</span> Order:<span>${topOrder.join('→')}</span>`;topDraw();return;}
+    const node=topQueue.shift();topCur=node;topProcessed.add(node);topOrder.push(node);
+    const dec=[];
+    cfg.edges.forEach(({u,v})=>{if(u===node&&topInDeg[v]!==undefined){topInDeg[v]--;dec.push(v);if(topInDeg[v]===0)topQueue.push(v);}});
+    document.getElementById('top-info').innerHTML=`process <span>${node}</span><br>decrement:[${dec.join(',')||'—'}] queue:[${topQueue.join(',')||'∅'}]`;
+    document.getElementById('top-order').textContent=topOrder.join(' → ');
+    topShowIndeg();
+    if(!topQueue.length){topDone=true;const hasCycle=topOrder.length<Object.keys(cfg.nodes).length;document.getElementById('top-info').innerHTML=hasCycle?'<span style="color:#ff6644">CYCLE detected!</span>':`<span>Done!</span> Order:<span>${topOrder.join('→')}</span>`;}
+    topDraw();
+  }
+  function topBack(){
+    const s=restoreSnap(topHist);if(!s)return;
+    topInDeg=s.indeg;topQueue=s.q;topOrder=s.order;topProcessed=new Set(s.proc);topCur=s.cur;topDone=s.done;
+    document.getElementById('top-info').innerHTML=s.info;document.getElementById('top-order').textContent=s.orderHTML;document.getElementById('top-indeg').innerHTML=s.indegHTML;
+    updateBackBtn(ID,topHist);topDraw();
+  }
+  function topDraw(){
+    const cv=document.getElementById('cv-'+ID);const c=cv.getContext('2d');
+    c.clearRect(0,0,cv.width,cv.height);
+    const ed=EDITORS[ID];
+    const procEdges=new Set();topProcessed.forEach(n=>cfg.edges.forEach(({u,v})=>{if(u===n)procEdges.add(n+'-'+v);}));
+    cfg.edges.forEach(({u,v},i)=>{
+      const a=cfg.nodes[u],b=cfg.nodes[v];if(!a||!b)return;
+      const isProc=procEdges.has(u+'-'+v),isHov=ed.hEdge===i;
+      const color=isProc?'#aa66ff':isHov?'#ff5544':'#1a2a40';
+      const dx=b.x-a.x,dy=b.y-a.y,l=Math.sqrt(dx*dx+dy*dy)||1;
+      drawArrow(c,a.x+dx/l*NR,a.y+dy/l*NR,b.x-dx/l*NR,b.y-dy/l*NR,color,isProc?2:1.5,isProc?color:null);
+    });
+    if(ed.mode==='addEdge'&&ed.edgeFirst&&ed.hNode&&ed.hNode!==ed.edgeFirst){
+      const a=cfg.nodes[ed.edgeFirst],b=cfg.nodes[ed.hNode];
+      c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.strokeStyle='rgba(200,100,255,.5)';c.lineWidth=1.5;c.setLineDash([5,5]);c.stroke();c.setLineDash([]);
+    }
+    const ns={};Object.keys(cfg.nodes).forEach(n=>{
+      const inQ=topQueue.includes(n),isCur=n===topCur,isProc=topProcessed.has(n)&&n!==topCur;
+      let fill='#0d1828',stroke='#2a5a9a',glow=null,textColor='#7ab3ff';
+      if(isCur){fill='#003344';stroke='#00d4ff';glow='#00d4ff';textColor='#00d4ff';}
+      else if(inQ){fill='#160020';stroke='#dd88ff';glow='#dd88ff';textColor='#ffaaff';}
+      else if(isProc){fill='#1a0a28';stroke='#aa66ff';textColor='#cc99ff';}
+      ns[n]={fill,stroke,glow,textColor};
+    });
+    drawNodeBase(c,cfg.nodes,ns,null,null,null,ed.hNode,ed.edgeFirst);
+    // Show in-degree
+    Object.keys(cfg.nodes).forEach(n=>{if(!topProcessed.has(n)){c.font='9px Share Tech Mono,monospace';c.fillStyle='#5a4a7a';c.textAlign='center';c.fillText('↓'+topInDeg[n],cfg.nodes[n].x,cfg.nodes[n].y+32);}});
+    // Show order index for processed
+    topOrder.forEach((n,i)=>{c.font='9px Share Tech Mono,monospace';c.fillStyle='#8855cc';c.textAlign='center';c.fillText('#'+(i+1),cfg.nodes[n].x,cfg.nodes[n].y+32);});
+  }
+  window.topDraw=topDraw;window.topReset=topReset;
+  window.topStep=topStep;window.topBack=topBack;
+  window.topRunAll=function(){if(topDone)topReset();let i=0;const iv=setInterval(()=>{topStep();i++;if(topDone||i>300)clearInterval(iv);},180);};
+  window.topRandom=function(){const n=Math.max(3,Math.min(12,parseInt(document.getElementById('top-rand-sz').value)||9));const g=randGraphDAG(n,'cv-top');cfg.nodes=g.nodes;cfg.edges=g.edges;topReset();};
+  window.topClear=function(){if(!confirm('Clear?'))return;cfg.nodes={A:{x:280,y:220}};cfg.edges=[];topReset();};
+  window.topSetMode=function(m){EDITORS[ID].setMode(m);};
+  topReset();
+})();
+
+// ═══════════════════════════════════════════════════════════════
+//  ALGORITHM INFO CARDS
+// ═══════════════════════════════════════════════════════════════
+(function(){
+  const INFO = {
+    dijk: {
+      accent: '#00d4ff',
+      name: "Dijkstra's Algorithm",
+      year: '1956 — Edsger W. Dijkstra',
+      what: 'Finds the shortest path from a source node to all other nodes in a weighted graph. Guarantees the optimal (lowest-cost) path to every reachable node.',
+      how: [
+        'Start with distance 0 at the source, ∞ everywhere else.',
+        'Always pick the unvisited node with the smallest known distance (via a priority queue).',
+        'For each neighbour, check if routing through the current node gives a shorter path — if so, update it ("relax" the edge).',
+        'Mark the current node visited and never revisit it.',
+        'Repeat until the target is reached or all nodes are settled.'
+      ],
+      complexity: { time: 'O((V + E) log V)', space: 'O(V)' },
+      uses: ['GPS & map navigation (Google Maps, Apple Maps)', 'Network routing protocols (OSPF)', 'Game AI pathfinding (A* is a guided extension)', 'Airline and rail timetable optimisation'],
+      limits: 'Cannot handle negative edge weights — use Bellman-Ford for those cases.'
+    },
+    ff: {
+      accent: '#cc88ff',
+      name: 'Ford-Fulkerson (Edmonds-Karp)',
+      year: '1956 — Ford & Fulkerson; 1972 — Edmonds & Karp',
+      what: 'Finds the maximum flow through a directed capacity network from a source (S) to a sink (T). Each edge has a capacity capping how much flow it can carry at once.',
+      how: [
+        'Start with zero flow on every edge.',
+        'Use BFS to find an augmenting path — a route from S to T with remaining residual capacity.',
+        'Identify the bottleneck: the minimum residual capacity along that path.',
+        'Push that amount of flow along the path, updating both forward and backward (residual) edges.',
+        'Repeat until no augmenting path exists — total flow is then maximum.'
+      ],
+      complexity: { time: 'O(V · E²) — Edmonds-Karp (BFS)', space: 'O(V + E)' },
+      uses: ['Network bandwidth & traffic allocation', 'Bipartite matching (job assignment, ad targeting)', 'Airline crew scheduling', 'Image segmentation via min-cut', 'Baseball elimination problems'],
+      limits: 'Directed graphs only. Requires non-negative integer or rational capacities to guarantee termination.'
+    },
+    bfs: {
+      accent: '#00dd88',
+      name: 'Breadth-First Search',
+      year: '1959 — Edward F. Moore',
+      what: 'Explores a graph level by level, visiting all nodes at distance 1 before those at distance 2, and so on. In unweighted graphs it finds the shortest path (minimum hops) from the source.',
+      how: [
+        'Enqueue the source node and mark it visited.',
+        'Dequeue the front node (FIFO order).',
+        'Enqueue all its unvisited neighbours and mark them visited immediately.',
+        'Track depth: each neighbour is one level deeper than the current node.',
+        'Repeat until the queue is empty — every reachable node has been processed.'
+      ],
+      complexity: { time: 'O(V + E)', space: 'O(V)' },
+      uses: ['Shortest path in unweighted graphs', 'Social network "degrees of separation"', 'Web crawlers exploring links layer by layer', 'Solving word-ladder and sliding-puzzle problems', 'Finding all connected components', 'Peer-to-peer broadcasting'],
+      limits: 'Treats all edges equally — does not account for edge weights. Uses more memory than DFS (stores entire frontier).'
+    },
+    dfs: {
+      accent: '#ffaa22',
+      name: 'Depth-First Search',
+      year: '19th c. — Trémaux (maze solving); formalised ~1960s',
+      what: 'Explores as deep as possible along each branch before backtracking. More useful for discovering graph structure than for finding shortest paths.',
+      how: [
+        'Push the source onto a stack (or call recursively).',
+        'Pop (or recurse into) the top node; if unvisited, mark it and process it.',
+        'Push all unvisited neighbours — they will be explored before siblings.',
+        'When a dead end is reached, backtrack automatically by popping the stack.',
+        'Continue until the stack is empty and all reachable nodes are visited.'
+      ],
+      complexity: { time: 'O(V + E)', space: 'O(V)' },
+      uses: ['Cycle detection in graphs', 'Topological sorting (recursive post-order DFS)', 'Strongly connected components (Tarjan, Kosaraju)', 'Maze generation and solving', 'Syntax tree traversal in compilers', 'Finding bridges and articulation points'],
+      limits: 'Does not find shortest paths. Recursive version can overflow the call stack on very deep graphs.'
+    },
+    kru: {
+      accent: '#44ccff',
+      name: "Kruskal's Algorithm",
+      year: '1956 — Joseph B. Kruskal',
+      what: 'Builds a Minimum Spanning Tree (MST) — the cheapest subset of edges that connects all nodes without any cycles. Operates on undirected, weighted, connected graphs.',
+      how: [
+        'Sort all edges by weight in ascending order.',
+        'Initialise a Union-Find structure with one component per node.',
+        'Examine each edge in order: if its endpoints are in different components, add it to the MST and merge the components.',
+        'If both endpoints share a component, skip the edge — it would create a cycle.',
+        'Stop when the MST has exactly V − 1 edges.'
+      ],
+      complexity: { time: 'O(E log E)', space: 'O(V + E)' },
+      uses: ['Minimum-cost network cabling (telecom, power grids)', 'Pipeline and road network design', 'Cluster analysis in machine learning', 'Image segmentation', 'Approximation algorithms for TSP'],
+      limits: 'Requires a connected graph. Less efficient than Prim on very dense graphs where E >> V.'
+    },
+    pri: {
+      accent: '#88ff44',
+      name: "Prim's Algorithm",
+      year: '1930 Jarník; 1957 Prim; 1959 Dijkstra (independently)',
+      what: 'Builds a Minimum Spanning Tree by growing one tree from a chosen start node, always extending it by the cheapest edge that reaches a new node.',
+      how: [
+        'Assign key = 0 to the start node, key = ∞ to all others.',
+        'Pick the non-MST node with the smallest key value.',
+        'Add it and its cheapest connecting edge to the MST.',
+        'Update keys of its neighbours: if the connecting edge is cheaper than their current key, replace it.',
+        'Repeat until every node is in the MST.'
+      ],
+      complexity: { time: 'O((V + E) log V) with a min-heap', space: 'O(V)' },
+      uses: ['Same domain as Kruskal: network cabling, pipeline routing', 'Preferred over Kruskal on dense graphs (E close to V²)', 'Maze generation', 'Approximation for TSP', 'Wireless mesh network design'],
+      limits: 'Requires a connected graph. The start node does not affect the final MST cost, only which of several equal-cost MSTs is produced.'
+    },
+    bfn: {
+      accent: '#ff6666',
+      name: 'Bellman-Ford Algorithm',
+      year: '1955 Shimbel; 1956 Ford; 1958 Bellman',
+      what: 'Finds shortest paths from a source to all reachable nodes, including graphs with negative edge weights. Also detects negative-weight cycles, which make shortest paths undefined.',
+      how: [
+        'Set source distance to 0; all others to ∞.',
+        'Relax every edge |V| − 1 times: for each edge u→v with weight w, if dist[u] + w < dist[v], update dist[v] = dist[u] + w.',
+        'After k passes, shortest paths using at most k edges are guaranteed correct.',
+        'Run one extra (V-th) pass: if any distance still decreases, a negative cycle is reachable.',
+        'Reconstruct paths by following predecessor pointers.'
+      ],
+      complexity: { time: 'O(V · E)', space: 'O(V)' },
+      uses: ['Routing protocols with negative costs (RIP)', 'Currency arbitrage detection in financial markets', 'Scheduling problems with time-window constraints', 'Detecting negative cycles in cost models'],
+      limits: 'Much slower than Dijkstra — O(VE) vs O((V+E) log V). If a negative cycle is reachable from the source, shortest paths to some nodes are −∞.'
+    },
+    top: {
+      accent: '#dd88ff',
+      name: "Topological Sort — Kahn's Algorithm",
+      year: '1962 — Arthur B. Kahn',
+      what: 'Orders nodes of a Directed Acyclic Graph (DAG) so that for every directed edge u → v, node u appears before v. Only possible when the graph has no cycles.',
+      how: [
+        'Compute the in-degree (number of incoming edges) for every node.',
+        'Enqueue all nodes with in-degree 0 — they have no unresolved dependencies.',
+        'Dequeue a node and add it to the topological order.',
+        'For each of its outgoing edges, decrement the neighbour\'s in-degree; if it reaches 0, enqueue it.',
+        'If the final order includes all nodes: success. If not, the graph contains a cycle.'
+      ],
+      complexity: { time: 'O(V + E)', space: 'O(V)' },
+      uses: ['Build systems & dependency resolution (Make, Gradle, npm)', 'Course prerequisite scheduling', 'Instruction scheduling in compilers', 'Spreadsheet formula evaluation order', 'Task pipeline / workflow orchestration', 'Package managers (apt, pip, cargo)'],
+      limits: 'Only valid on DAGs — any cycle makes a topological ordering impossible.'
+    }
+  };
+
+  const style = document.createElement('style');
+  style.textContent = `
+    .algo-info-card{width:100%;max-width:1100px;background:#0d1220;border:1px solid #1a2a40;border-radius:8px;margin-bottom:12px;overflow:hidden;}
+    .algo-info-header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;cursor:pointer;user-select:none;border-bottom:1px solid transparent;transition:border-color .2s;}
+    .algo-info-header:hover{background:rgba(255,255,255,.02);}
+    .algo-info-header.open{border-bottom-color:#1a2a40;}
+    .algo-info-title{font-family:'Share Tech Mono',monospace;font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;}
+    .algo-info-year{font-family:'Share Tech Mono',monospace;font-size:.58rem;color:#3a5a7a;margin-left:14px;}
+    .algo-info-toggle{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:#3a5a7a;white-space:nowrap;transition:color .2s;}
+    .algo-info-toggle.open{color:#7ab3ff;}
+    .algo-info-body{padding:14px 16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+    .algo-info-body.collapsed{display:none;}
+    .algo-info-section-title{font-family:'Share Tech Mono',monospace;font-size:.6rem;letter-spacing:.14em;margin-bottom:7px;opacity:.65;}
+    .algo-info-text{font-size:.8rem;color:#8a9abf;line-height:1.68;font-weight:300;}
+    .algo-info-steps{list-style:none;padding:0;margin:0;}
+    .algo-info-steps li{font-size:.78rem;color:#8a9abf;line-height:1.65;padding:3px 0 3px 18px;position:relative;font-weight:300;}
+    .algo-info-steps li::before{content:attr(data-n);position:absolute;left:0;font-family:'Share Tech Mono',monospace;font-size:.6rem;top:6px;opacity:.55;}
+    .algo-info-uses{list-style:none;padding:0;margin:0;}
+    .algo-info-uses li{font-size:.78rem;color:#8a9abf;line-height:1.65;padding:2px 0 2px 13px;position:relative;font-weight:300;}
+    .algo-info-uses li::before{content:'›';position:absolute;left:0;opacity:.5;}
+    .algo-complexity{display:inline-block;font-family:'Share Tech Mono',monospace;font-size:.66rem;padding:3px 8px;border-radius:4px;margin:3px 4px 3px 0;background:#060c18;border:1px solid #1a2a40;}
+    .algo-info-limit{font-size:.76rem;color:#7a5a4a;line-height:1.65;padding:8px 10px;background:#0e0808;border-radius:5px;border-left:2px solid #5a2a1a;margin-top:8px;font-weight:300;}
+    .algo-info-limit::before{content:'⚠  ';font-size:.7rem;opacity:.7;}
+    @media(max-width:800px){.algo-info-body{grid-template-columns:1fr;}}
+  `;
+  document.head.appendChild(style);
+
+  function buildCard(tabId, data) {
+    const sec = document.getElementById('sec-' + tabId);
+    if (!sec) return;
+    const card = document.createElement('div');
+    card.className = 'algo-info-card';
+    const stepsHTML = data.how.map((s,i)=>`<li data-n="${i+1}.">${s}</li>`).join('');
+    const usesHTML  = data.uses.map(u=>`<li>${u}</li>`).join('');
+    card.innerHTML = `
+      <div class="algo-info-header" id="info-hdr-${tabId}" onclick="toggleInfoCard('${tabId}')">
+        <div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:0">
+          <span class="algo-info-title" style="color:${data.accent}">// ${data.name}</span>
+          <span class="algo-info-year">${data.year}</span>
+        </div>
+        <span class="algo-info-toggle" id="info-tog-${tabId}">▾ show info</span>
+      </div>
+      <div class="algo-info-body collapsed" id="info-body-${tabId}">
+        <div>
+          <div class="algo-info-section-title" style="color:${data.accent}">WHAT IT DOES</div>
+          <p class="algo-info-text">${data.what}</p>
+          <div style="margin-top:10px">
+            <div class="algo-info-section-title" style="color:${data.accent}">COMPLEXITY</div>
+            <span class="algo-complexity" style="color:${data.accent};border-color:${data.accent}44">⏱ ${data.complexity.time}</span>
+            <span class="algo-complexity" style="color:#7a8aaa">💾 ${data.complexity.space}</span>
+          </div>
+          <div class="algo-info-limit">${data.limits}</div>
+        </div>
+        <div>
+          <div class="algo-info-section-title" style="color:${data.accent}">HOW IT WORKS</div>
+          <ol class="algo-info-steps">${stepsHTML}</ol>
+        </div>
+        <div>
+          <div class="algo-info-section-title" style="color:${data.accent}">COMMON USES</div>
+          <ul class="algo-info-uses">${usesHTML}</ul>
+        </div>
+      </div>`;
+    sec.insertBefore(card, sec.firstChild);
+  }
+
+  window.toggleInfoCard = function(tabId) {
+    const body = document.getElementById('info-body-' + tabId);
+    const tog  = document.getElementById('info-tog-' + tabId);
+    const hdr  = document.getElementById('info-hdr-' + tabId);
+    const isOpen = !body.classList.contains('collapsed');
+    body.classList.toggle('collapsed', isOpen);
+    hdr.classList.toggle('open', !isOpen);
+    tog.classList.toggle('open', !isOpen);
+    tog.textContent = isOpen ? '▾ show info' : '▴ hide info';
+  };
+
+  Object.entries(INFO).forEach(([id, data]) => buildCard(id, data));
+})();
+</script>
+</body>
+</html>

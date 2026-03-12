@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graphes &mdash; Entrainement</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #0d1117;
+            color: #e6edf3;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            gap: 14px;
+        }
+
+        header { text-align: center; }
+        h1 { font-size: 2rem; color: #58a6ff; margin-bottom: 4px; }
+        .subtitle { color: #8b949e; font-size: 0.88rem; }
+
+        .mode-selector {
+            display: flex;
+            gap: 4px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 10px;
+            padding: 4px;
+            width: min(1140px, 100%);
+        }
+        .mode-btn {
+            flex: 1; padding: 12px 20px; border: none; border-radius: 7px;
+            background: transparent; color: #8b949e; cursor: pointer;
+            text-align: center; transition: all 0.2s;
+            font-size: 0.95rem; font-weight: bold; min-width: unset;
+        }
+        .mode-btn .mode-sub { display: block; font-size: 0.72rem; font-weight: normal; margin-top: 2px; opacity: 0.7; }
+        .mode-btn:hover:not(.active) { background: #1c2434; color: #c9d1d9; }
+        .mode-btn.active { background: #1c2e4a; color: #58a6ff; box-shadow: 0 0 0 1px #388bfd; }
+
+        .main-layout {
+            display: flex; gap: 14px; width: min(1140px, 100%); align-items: flex-start;
+        }
+
+        .game-box {
+            background: #161b22; border: 1px solid #30363d; border-radius: 12px;
+            padding: 18px; flex: 1; min-width: 0;
+        }
+
+        .top-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #30363d;
+        }
+
+        #livesDisplay { font-size: 1.3rem; letter-spacing: 2px; min-width: 80px; }
+        #taskDisplay  { font-size: 1rem; color: #ffa657; font-weight: bold; text-align: center; }
+        #scoreDisplay { color: #8b949e; font-size: 0.85rem; text-align: right; min-width: 80px; }
+
+        canvas {
+            border-radius: 8px; cursor: pointer; display: block;
+            width: 100%; background: #0d1117;
+        }
+
+        .info-row {
+            display: flex; align-items: center; gap: 10px; margin-top: 10px;
+            padding: 10px 14px; background: #0d1117; border-radius: 8px; min-height: 44px;
+        }
+
+        .path-label  { color: #8b949e; font-size: 0.85rem; white-space: nowrap; }
+        #pathDisplay { color: #58a6ff; font-weight: bold; font-size: 0.95rem; flex: 1; }
+        #ffTotalDisplay { color: #ffa657; font-weight: bold; font-size: 1rem; }
+
+        /* Ligne saisie de flux (FF) */
+        #ffEdgeInputRow { background: #1a2233; border: 1px solid #388bfd; }
+        #ffEdgeLabel    { color: #79c0ff; font-size: 0.85rem; white-space: nowrap; }
+
+        #ffFlowInput {
+            width: 80px; padding: 7px 10px; background: #0d1117;
+            border: 1px solid #388bfd; border-radius: 6px; color: #e6edf3;
+            font-size: 1rem; font-weight: bold; outline: none; text-align: center;
+        }
+        #ffFlowInput:focus { border-color: #58a6ff; }
+
+        .btn-row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+
+        button {
+            padding: 10px 14px; border: none; border-radius: 8px;
+            font-size: 0.88rem; font-weight: bold; cursor: pointer;
+            transition: filter 0.15s; flex: 1; min-width: 90px;
+        }
+        button:hover:not(:disabled) { filter: brightness(1.15); }
+        button:active:not(:disabled) { filter: brightness(0.88); }
+        button:disabled { opacity: 0.35; cursor: default; }
+
+        #btnValider    { background: #238636; color: #fff; flex: 2; }
+        #btnUndo       { background: #b62324; color: #fff; }
+        #btnReset      { background: #6e40c9; color: #fff; }
+        #btnNouveau    { background: #1f6feb; color: #fff; }
+        #btnIndice     { background: #7d4e00; color: #fff; }
+        #btnFFValider  { background: #238636; color: #fff; flex: 2; }
+        #btnApplyFlow  { background: #388bfd; color: #fff; padding: 7px 14px; flex: none; min-width: unset; font-size: 0.85rem; }
+        #btnRemoveFlow { background: #b62324; color: #fff; padding: 7px 14px; flex: none; min-width: unset; font-size: 0.85rem; }
+
+        #message {
+            margin-top: 10px; padding: 10px 14px; border-radius: 8px;
+            font-weight: bold; font-size: 0.9rem; text-align: center; min-height: 16px;
+        }
+        .msg-error    { background: #3d1011; color: #ff7b72; border: 1px solid #6e2129; }
+        .msg-success  { background: #1b3a27; color: #56d364; border: 1px solid #1f4b2e; }
+        .msg-info     { background: #1c2e4a; color: #79c0ff; border: 1px solid #1f3e5a; }
+        .msg-gameover { background: #2d1c4a; color: #d2a8ff; border: 1px solid #4a2d7a; }
+
+        .legend {
+            display: flex; gap: 14px; margin-top: 10px;
+            font-size: 0.78rem; color: #8b949e; flex-wrap: wrap;
+        }
+        .legend-item { display: flex; align-items: center; gap: 5px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; border: 2px solid transparent; }
+
+        /* Notepad / Tableau */
+        .notepad-box {
+            background: #161b22; border: 1px solid #30363d; border-radius: 12px;
+            padding: 16px; width: 310px; flex-shrink: 0;
+            display: flex; flex-direction: column; gap: 10px;
+            position: sticky; top: 20px;
+        }
+        .notepad-tabs {
+            display: flex; align-items: center; gap: 4px;
+            padding-bottom: 10px; border-bottom: 1px solid #30363d;
+        }
+        .ntab {
+            flex: none; padding: 6px 12px; border: none; border-radius: 6px;
+            font-size: 0.82rem; font-weight: bold; cursor: pointer;
+            background: transparent; color: #8b949e; transition: all 0.2s; min-width: unset;
+        }
+        .ntab:hover:not(.active) { background: #1c2434; color: #c9d1d9; }
+        .ntab.active { background: #1c2e4a; color: #58a6ff; box-shadow: 0 0 0 1px #388bfd; }
+        .notepad-saved { font-size: 0.72rem; color: #3fb950; opacity: 0; transition: opacity 0.4s; margin-left: auto; }
+        .notepad-saved.show { opacity: 1; }
+        #noteArea {
+            width: 100%; height: 400px; resize: vertical; background: #0d1117;
+            border: 1px solid #30363d; border-radius: 8px; color: #e6edf3;
+            font-family: 'Consolas', 'Courier New', monospace; font-size: 0.85rem;
+            line-height: 1.55; padding: 10px; outline: none; transition: border-color 0.2s;
+        }
+        #noteArea:focus { border-color: #58a6ff; }
+        #noteArea::placeholder { color: #484f58; }
+        .notepad-btns { display: flex; gap: 8px; }
+        .notepad-btns button { flex: 1; padding: 8px 10px; font-size: 0.82rem; min-width: unset; }
+        #btnCopyNote  { background: #1f6feb; color: #fff; }
+        #btnClearNote { background: #6e323a; color: #fff; }
+        #btnClearTable { background: #6e323a; color: #fff; }
+
+        /* Table */
+        .table-wrapper { overflow: hidden; border-radius: 6px; }
+        #noteTable { border-collapse: collapse; width: 100%; table-layout: fixed; font-size: 0.78rem; }
+        #noteTable td {
+            border: 1px solid #30363d; padding: 3px 2px; height: 36px;
+            outline: none; color: #e6edf3; white-space: pre; background: #0d1117;
+            overflow: hidden; text-align: center;
+        }
+        #noteTable td:focus { background: #161b22; box-shadow: inset 0 0 0 1px #388bfd; }
+
+        @media (max-width: 900px) {
+            .main-layout { flex-direction: column; }
+            .notepad-box { width: 100%; position: static; }
+            #noteArea    { height: 200px; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1 id="mainTitle">Bellman-Ford</h1>
+    <p class="subtitle" id="mainSubtitle">Distance-Vector &mdash; Trouvez le plus court chemin !</p>
+</header>
+
+<div class="mode-selector">
+    <button class="mode-btn active" id="btnModeBF" onclick="setMode('bf')">
+        Bellman-Ford
+        <span class="mode-sub">Plus court chemin</span>
+    </button>
+    <button class="mode-btn" id="btnModeFF" onclick="setMode('ff')">
+        Ford-Fulkerson
+        <span class="mode-sub">Flux maximum</span>
+    </button>
+</div>
+
+<div class="main-layout">
+    <div class="game-box">
+        <div class="top-bar">
+            <div id="livesDisplay">&#x2764;&#x2764;&#x2764;</div>
+            <div id="taskDisplay">Chargement...</div>
+            <div id="scoreDisplay"></div>
+        </div>
+
+        <canvas id="graphCanvas" width="720" height="420"></canvas>
+
+        <!-- BF: chemin en cours -->
+        <div class="info-row" id="bfPathRow">
+            <span class="path-label">Chemin :</span>
+            <span id="pathDisplay">Cliquez sur le noeud source pour commencer</span>
+        </div>
+
+        <!-- FF: flux total actuel -->
+        <div class="info-row" id="ffInfoRow" style="display:none">
+            <span class="path-label">Flux total sortant de <span id="ffSrcLabel">?</span> :</span>
+            <span id="ffTotalDisplay">0</span>
+            <span style="color:#8b949e;font-size:0.82rem;margin-left:6px" id="ffHint">Cliquez sur une arete pour lui assigner un flux</span>
+        </div>
+
+        <!-- FF: saisie flux sur arete selectionnee -->
+        <div class="info-row" id="ffEdgeInputRow" style="display:none">
+            <span class="path-label" id="ffEdgeLabel">Flux :</span>
+            <input id="ffFlowInput" type="number" min="0" placeholder="0" />
+            <button id="btnApplyFlow"  onclick="applyEdgeFlow()">OK</button>
+            <button id="btnRemoveFlow" onclick="removeEdgeFlow()" disabled>Supprimer</button>
+        </div>
+
+        <!-- Boutons -->
+        <div class="btn-row">
+            <!-- BF uniquement -->
+            <button id="btnUndo"    onclick="undoStep()">&#x21A9; Annuler</button>
+            <button id="btnValider" onclick="valider()" disabled>&#x2714; Valider</button>
+            <button id="btnIndice"  onclick="showIndice()">? Indice (-1 vie)</button>
+            <!-- FF uniquement -->
+            <button id="btnFFValider" onclick="ffValider()" style="display:none">&#x2714; Valider le flux</button>
+            <!-- Communs -->
+            <button id="btnReset"   onclick="resetAction()">&#x21BA; Reset</button>
+            <button id="btnNouveau" onclick="newGame()">Nouveau graphe</button>
+        </div>
+
+        <div id="message"></div>
+
+        <!-- Legende BF -->
+        <div class="legend" id="legendBF">
+            <div class="legend-item"><span class="dot" style="background:#1a4a2a;border-color:#39d353"></span>Source</div>
+            <div class="legend-item"><span class="dot" style="background:#4a1a1a;border-color:#f85149"></span>Destination</div>
+            <div class="legend-item"><span class="dot" style="background:#3d2b00;border-color:#ffa657"></span>Chemin trace</div>
+            <div class="legend-item"><span class="dot" style="background:#0d2a0d;border-color:#39d353"></span>Solution (game over)</div>
+        </div>
+
+        <!-- Legende FF -->
+        <div class="legend" id="legendFF" style="display:none">
+            <div class="legend-item"><span class="dot" style="background:#1a4a2a;border-color:#39d353"></span>Source (S)</div>
+            <div class="legend-item"><span class="dot" style="background:#4a1a1a;border-color:#f85149"></span>Puits (T)</div>
+            <div class="legend-item"><span class="dot" style="background:#3d2b00;border-color:#ffa657"></span>Arete selectionnee</div>
+            <div class="legend-item"><span class="dot" style="background:#1c3a1c;border-color:#39d353"></span>Arete avec flux</div>
+            <div class="legend-item"><span class="dot" style="background:#3a3f48;border-color:#484f58"></span>Arete saturee</div>
+        </div>
+    </div>
+
+    <!-- Bloc-notes / Tableau -->
+    <div class="notepad-box">
+        <div class="notepad-tabs">
+            <button class="ntab active" id="tabNotes"   onclick="switchTab('notes')">&#x1F4DD; Notes</button>
+            <button class="ntab"        id="tabTableau" onclick="switchTab('tableau')">&#x1F4CA; Tableau</button>
+            <span class="notepad-saved" id="savedLabel">Sauvegarde !</span>
+        </div>
+
+        <!-- Panel Notes -->
+        <div id="panelNotes">
+            <textarea id="noteArea"
+                placeholder="Ecris tes calculs ici...&#10;&#10;BF ex :&#10;A=0&#10;B=0+5=5&#10;C=0+3=3&#10;&#10;FF ex :&#10;A->C : 3/8&#10;A->B : 5/5 (sature)&#10;Conservation B : entrant=5, sortant=5 ok&#10;Flux max = 8"></textarea>
+            <div class="notepad-btns">
+                <button id="btnCopyNote"  onclick="copyNotes()">Copier</button>
+                <button id="btnClearNote" onclick="clearNotes()">Effacer</button>
+            </div>
+        </div>
+
+        <!-- Panel Tableau -->
+        <div id="panelTableau" style="display:none">
+            <div class="table-wrapper">
+                <table id="noteTable"></table>
+            </div>
+            <div class="notepad-btns" style="margin-top:8px">
+                <button id="btnClearTable" onclick="clearTable()">Effacer tableau</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const canvas = document.getElementById('graphCanvas');
+const ctx    = canvas.getContext('2d');
+const NODE_R = 22;
+
+let mode         = 'bf';
+let graph        = null;
+let selectedPath = [];
+let lives        = 3;
+let source       = '';
+let dest         = '';
+let gameOver     = false;
+let score        = 0;
+
+// BF state
+let bfResult    = null;
+let correctPath = [];
+let indiceDone  = false;
+
+// BF animation
+let pulseTimer  = 0;
+let pulseRaf    = null;
+
+// FF state
+let ffEdgeFlows  = {};   // [from][to] = flux assigné par le joueur
+let ffOptFlows   = {};   // [from][to] = flux optimal (pour solution visuelle)
+let ffMaxFlow    = 0;
+let selectedEdge = null;
+
+const rnd = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
+
+// ─── Bloc-notes ───────────────────────────────────────────────────────────────
+
+const noteArea   = document.getElementById('noteArea');
+const savedLabel = document.getElementById('savedLabel');
+let   saveTimer  = null;
+noteArea.value   = localStorage.getItem('algo_notes') || '';
+
+noteArea.addEventListener('input', () => {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+        localStorage.setItem('algo_notes', noteArea.value);
+        savedLabel.classList.add('show');
+        setTimeout(() => savedLabel.classList.remove('show'), 1500);
+    }, 600);
+});
+
+function copyNotes() {
+    navigator.clipboard.writeText(noteArea.value).then(() => {
+        const btn = document.getElementById('btnCopyNote');
+        btn.textContent = 'Copie !';
+        setTimeout(() => btn.textContent = 'Copier', 1500);
+    });
+}
+function clearNotes() {
+    if (!noteArea.value) return;
+    if (confirm('Effacer toutes les notes ?')) { noteArea.value = ''; localStorage.removeItem('algo_notes'); }
+}
+
+// ─── Tab switch ───────────────────────────────────────────────────────────────
+
+function switchTab(tab) {
+    document.getElementById('tabNotes').classList.toggle('active',   tab === 'notes');
+    document.getElementById('tabTableau').classList.toggle('active', tab === 'tableau');
+    document.getElementById('panelNotes').style.display   = tab === 'notes'   ? '' : 'none';
+    document.getElementById('panelTableau').style.display = tab === 'tableau' ? '' : 'none';
+}
+
+// ─── Tableau Excel ────────────────────────────────────────────────────────────
+
+const TABLE_ROWS = 14;
+const TABLE_COLS = 7;
+const TABLE_KEY  = 'algo_table';
+
+function saveTable() {
+    const data = [];
+    document.querySelectorAll('#noteTable tr').forEach(tr => {
+        const row = [];
+        tr.querySelectorAll('td').forEach(td => row.push(td.innerText));
+        data.push(row);
+    });
+    localStorage.setItem(TABLE_KEY, JSON.stringify(data));
+    savedLabel.classList.add('show');
+    setTimeout(() => savedLabel.classList.remove('show'), 1500);
+}
+
+function initTable() {
+    const saved = JSON.parse(localStorage.getItem(TABLE_KEY) || 'null');
+    const table = document.getElementById('noteTable');
+    table.innerHTML = '';
+    for (let r = 0; r < TABLE_ROWS; r++) {
+        const tr = document.createElement('tr');
+        for (let c = 0; c < TABLE_COLS; c++) {
+            const td = document.createElement('td');
+            td.contentEditable = 'true';
+            td.spellcheck = false;
+            if (saved && saved[r] && saved[r][c] !== undefined) {
+                td.innerText = saved[r][c];
+            }
+            td.addEventListener('input', () => { clearTimeout(saveTimer); saveTimer = setTimeout(saveTable, 600); });
+            td.addEventListener('keydown', e => {
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    const cells = Array.from(table.querySelectorAll('td'));
+                    const idx   = cells.indexOf(td);
+                    const next  = cells[idx + (e.shiftKey ? -1 : 1)];
+                    if (next) { next.focus(); const range = document.createRange(); const sel = window.getSelection(); range.selectNodeContents(next); range.collapse(false); sel.removeAllRanges(); sel.addRange(range); }
+                }
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    const cells = Array.from(table.querySelectorAll('td'));
+                    const idx   = cells.indexOf(td);
+                    const next  = cells[idx + TABLE_COLS];
+                    if (next) { next.focus(); const range = document.createRange(); const sel = window.getSelection(); range.selectNodeContents(next); range.collapse(false); sel.removeAllRanges(); sel.addRange(range); }
+                }
+            });
+            tr.appendChild(td);
+        }
+        table.appendChild(tr);
+    }
+}
+
+function syncNoteHeight() {
+    const tPanel = document.getElementById('panelTableau');
+    const savedDisplay = tPanel.style.display;
+    // Mesurer la hauteur du panneau tableau en le rendant visible hors ecran
+    Object.assign(tPanel.style, { display: 'block', visibility: 'hidden', position: 'absolute' });
+    const tHeight = tPanel.offsetHeight;
+    Object.assign(tPanel.style, { display: savedDisplay, visibility: '', position: '' });
+    if (tHeight > 0) {
+        const btnsEl = document.querySelector('#panelNotes .notepad-btns');
+        const btnsH  = btnsEl ? btnsEl.offsetHeight + 8 : 44;
+        noteArea.style.height = Math.max(100, tHeight - btnsH) + 'px';
+    }
+}
+
+function clearTable() {
+    if (!confirm('Effacer tout le tableau ?')) return;
+    localStorage.removeItem(TABLE_KEY);
+    initTable();
+}
+
+initTable();
+setTimeout(syncNoteHeight, 0);
+
+// ─── Mode ────────────────────────────────────────────────────────────────────
+
+function setMode(m) {
+    mode = m;
+    document.getElementById('btnModeBF').classList.toggle('active', m === 'bf');
+    document.getElementById('btnModeFF').classList.toggle('active', m === 'ff');
+
+    document.getElementById('mainTitle').textContent    = m === 'bf' ? 'Bellman-Ford' : 'Ford-Fulkerson';
+    document.getElementById('mainSubtitle').textContent = m === 'bf'
+        ? 'Distance-Vector \u2014 Trouvez le plus court chemin !'
+        : 'Flux Maximum \u2014 Assignez les flux et trouvez le flux maximum !';
+
+    // Lignes info
+    document.getElementById('bfPathRow').style.display      = m === 'bf' ? 'flex' : 'none';
+    document.getElementById('ffInfoRow').style.display      = m === 'ff' ? 'flex' : 'none';
+    document.getElementById('ffEdgeInputRow').style.display = 'none';
+
+    // Boutons
+    document.getElementById('btnUndo').style.display      = m === 'bf' ? '' : 'none';
+    document.getElementById('btnValider').style.display   = m === 'bf' ? '' : 'none';
+    document.getElementById('btnIndice').style.display    = m === 'bf' ? '' : 'none';
+    document.getElementById('btnFFValider').style.display = m === 'ff' ? '' : 'none';
+    document.getElementById('btnReset').textContent = m === 'bf' ? '\u21BA Reset' : '\u21BA Effacer flux';
+
+    // Legendes
+    document.getElementById('legendBF').style.display = m === 'bf' ? 'flex' : 'none';
+    document.getElementById('legendFF').style.display = m === 'ff' ? 'flex' : 'none';
+
+    newGame();
+}
+
+// ─── Graph generation ─────────────────────────────────────────────────────────
+
+function buildNodes(numNodes) {
+    const labels = 'ABCDEFGHIJKLMNO'.slice(0, numNodes).split('');
+    const W = canvas.width, H = canvas.height;
+    const padX = 72, padY = 55;
+    const MIN_DIST = 100;
+
+    const nodes = [];
+    nodes.push({ label: labels[0], x: padX, y: Math.round(H / 2) });
+
+    const midLabels = labels.slice(1, -1);
+    const numCols = Math.max(1, Math.ceil(midLabels.length / 2));
+    const colW = (W - 2 * padX) / (numCols + 1);
+
+    midLabels.forEach((lbl, i) => {
+        const col = i % numCols;
+        const preferX = padX + (col + 1) * colW;
+        // Première moitié en haut, deuxième en bas — bien séparées verticalement
+        const preferY = i < numCols ? H * 0.20 : H * 0.80;
+
+        let x = Math.round(preferX), y = Math.round(preferY);
+        for (let attempt = 0; attempt < 100; attempt++) {
+            const tx = Math.round(preferX + (Math.random() - 0.5) * colW * 0.55);
+            const ty = Math.round(preferY + (Math.random() - 0.5) * H * 0.22);
+            const cx = Math.max(padX + 30, Math.min(W - padX - 30, tx));
+            const cy = Math.max(padY, Math.min(H - padY, ty));
+            if (nodes.every(n => Math.hypot(n.x - cx, n.y - cy) >= MIN_DIST)) {
+                x = cx; y = cy; break;
+            }
+        }
+        nodes.push({ label: lbl, x, y });
+    });
+
+    nodes.push({ label: labels[numNodes - 1], x: W - padX, y: Math.round(H / 2) });
+    return nodes;
+}
+
+function generateBFGraph() {
+    const numNodes = rnd(5, 7);
+    const nodes    = buildNodes(numNodes);
+    const labels   = nodes.map(n => n.label);
+    const dst      = labels[labels.length - 1];
+    const edges    = [], edgeSet = new Set();
+    // Regles : pas de boucle, pas de bidirectionnel, pas de sortante depuis dest
+    const add = (f, t, w) => {
+        const k = `${f}->${t}`, rev = `${t}->${f}`;
+        if (!edgeSet.has(k) && !edgeSet.has(rev) && f !== t && f !== dst) {
+            edgeSet.add(k); edges.push({from:f, to:t, w});
+        }
+    };
+    const shuffled = [...labels].sort(() => Math.random() - 0.5);
+    for (let i = 1; i < numNodes; i++) {
+        let f = shuffled[rnd(0,i-1)], t = shuffled[i];
+        if (f === dst) { const tmp = f; f = t; t = tmp; } // dst ne peut pas être source
+        add(f, t, rnd(1,15));
+    }
+    // Aretes supplementaires (limite selon le nombre de noeuds)
+    const extraBF = Math.max(1, Math.floor(numNodes / 3));
+    for (let k = 0; k < extraBF; k++) {
+        const fi = rnd(0,numNodes-1), ti = rnd(0,numNodes-1);
+        if (fi !== ti) add(labels[fi], labels[ti], rnd(1,15));
+    }
+    // Garantir >= 2 sortantes depuis la source
+    const src = labels[0];
+    if (edges.filter(e => e.from === src).length < 2) {
+        const cands = labels.filter(l => l !== src && !edgeSet.has(`${src}->${l}`) && !edgeSet.has(`${l}->${src}`));
+        if (cands.length) add(src, cands[rnd(0, cands.length-1)], rnd(1,15));
+    }
+    // Garantir >= 2 entrantes sur la destination
+    if (edges.filter(e => e.to === dst).length < 2) {
+        const cands = labels.filter(l => l !== dst && !edgeSet.has(`${l}->${dst}`) && !edgeSet.has(`${dst}->${l}`));
+        if (cands.length) add(cands[rnd(0, cands.length-1)], dst, rnd(1,15));
+    }
+    return { nodes, edges, numNodes };
+}
+
+function generateFFGraph() {
+    const numNodes = rnd(5, 7);
+    const nodes    = buildNodes(numNodes);
+    const labels   = nodes.map(n => n.label);
+    const dst      = labels[labels.length - 1];
+    const src      = labels[0];
+    const edges    = [], edgeSet = new Set();
+    const add = (f, t, w) => {
+        const k = `${f}->${t}`, rev = `${t}->${f}`;
+        if (!edgeSet.has(k) && !edgeSet.has(rev) && f !== t && f !== dst && !(f === src && t === dst)) {
+            edgeSet.add(k); edges.push({from:f, to:t, w});
+        }
+    };
+    const shuffled = [...labels].sort(() => Math.random() - 0.5);
+    for (let i = 1; i < numNodes; i++) {
+        let f = shuffled[rnd(0,i-1)], t = shuffled[i];
+        if (f === dst) { const tmp = f; f = t; t = tmp; }
+        add(f, t, rnd(2,12));
+    }
+    const extraFF = Math.max(1, Math.floor(numNodes / 3));
+    for (let k = 0; k < extraFF; k++) {
+        const fi = rnd(0,numNodes-1), ti = rnd(0,numNodes-1);
+        if (fi !== ti) add(labels[fi], labels[ti], rnd(2,12));
+    }
+    // Supprimer tout lien direct src->dst
+    const directIdx = edges.findIndex(e => e.from === src && e.to === dst);
+    if (directIdx !== -1) { edges.splice(directIdx, 1); edgeSet.delete(`${src}->${dst}`); }
+    // Garantir >= 2 sortantes depuis la source
+    if (edges.filter(e => e.from === src).length < 2) {
+        const cands = labels.filter(l => l !== src && !edgeSet.has(`${src}->${l}`) && !edgeSet.has(`${l}->${src}`));
+        if (cands.length) add(src, cands[rnd(0, cands.length-1)], rnd(2,12));
+    }
+    // Garantir >= 2 entrantes sur la destination
+    if (edges.filter(e => e.to === dst).length < 2) {
+        const cands = labels.filter(l => l !== dst && !edgeSet.has(`${l}->${dst}`) && !edgeSet.has(`${dst}->${l}`));
+        if (cands.length) add(cands[rnd(0, cands.length-1)], dst, rnd(2,12));
+    }
+    return { nodes, edges, numNodes };
+}
+
+// ─── Bellman-Ford ─────────────────────────────────────────────────────────────
+
+function bellmanFord(nodes, edges, src) {
+    const dist = {}, prev = {};
+    for (const { label } of nodes) { dist[label] = Infinity; prev[label] = null; }
+    dist[src] = 0;
+    for (let i = 0; i < nodes.length - 1; i++) {
+        let changed = false;
+        for (const { from, to, w } of edges) {
+            if (dist[from] !== Infinity && dist[from] + w < dist[to]) {
+                dist[to] = dist[from] + w; prev[to] = from; changed = true;
+            }
+        }
+        if (!changed) break;
+    }
+    return { dist, prev };
+}
+
+function reconstructPath(prev, dst) {
+    const path = [], seen = new Set();
+    let c = dst;
+    while (c !== null && !seen.has(c)) { path.unshift(c); seen.add(c); c = prev[c]; }
+    return path;
+}
+
+function pathCostBF(path) {
+    let cost = 0;
+    for (let i = 0; i < path.length - 1; i++) {
+        const e = graph.edges.find(e => e.from === path[i] && e.to === path[i+1]);
+        if (!e) return Infinity;
+        cost += e.w;
+    }
+    return cost;
+}
+
+// ─── BF Animation ────────────────────────────────────────────────────────────
+
+function startPulse() {
+    pulseTimer = 0;
+    if (pulseRaf) cancelAnimationFrame(pulseRaf);
+    function step() {
+        pulseTimer += 0.07;
+        draw();
+        if (pulseTimer < Math.PI * 5) pulseRaf = requestAnimationFrame(step);
+        else { pulseRaf = null; draw(); }
+    }
+    step();
+}
+
+// ─── Ford-Fulkerson ───────────────────────────────────────────────────────────
+
+function initFFState() {
+    ffEdgeFlows  = {};
+    ffOptFlows   = {};
+    selectedEdge = null;
+    const labels = graph.nodes.map(n => n.label);
+    for (const a of labels) {
+        ffEdgeFlows[a] = {}; ffOptFlows[a] = {};
+        for (const b of labels) { ffEdgeFlows[a][b] = 0; ffOptFlows[a][b] = 0; }
+    }
+    document.getElementById('ffTotalDisplay').textContent = '0';
+    document.getElementById('ffEdgeInputRow').style.display = 'none';
+    document.getElementById('ffHint').style.display = '';
+}
+
+function computeMaxFlowFull(nodes, edges, src, snk) {
+    const labels = nodes.map(n => n.label);
+    const origCap = {}, cap = {};
+    for (const l of labels) { origCap[l] = {}; cap[l] = {}; for (const m of labels) { origCap[l][m] = 0; cap[l][m] = 0; } }
+    for (const e of edges) { origCap[e.from][e.to] = e.w; cap[e.from][e.to] = e.w; }
+
+    let maxFlow = 0;
+    while (true) {
+        const parent = {}, visited = new Set([src]), queue = [src]; let found = false;
+        outer: while (queue.length) {
+            const u = queue.shift();
+            for (const v of labels) {
+                if (!visited.has(v) && cap[u][v] > 0) {
+                    parent[v] = u; visited.add(v);
+                    if (v === snk) { found = true; break outer; }
+                    queue.push(v);
+                }
+            }
+        }
+        if (!found) break;
+        let bn = Infinity, v = snk;
+        while (v !== src) { bn = Math.min(bn, cap[parent[v]][v]); v = parent[v]; }
+        v = snk;
+        while (v !== src) { cap[parent[v]][v] -= bn; cap[v][parent[v]] += bn; v = parent[v]; }
+        maxFlow += bn;
+    }
+
+    // Compute flows on original edges
+    const flow = {};
+    for (const l of labels) { flow[l] = {}; for (const m of labels) flow[l][m] = 0; }
+    for (const e of edges) flow[e.from][e.to] = origCap[e.from][e.to] - cap[e.from][e.to];
+
+    return { maxFlow, flow };
+}
+
+// Compute edge label click positions (for FF mode edge selection)
+function computeEdgeLabelPos() {
+    for (const edge of graph.edges) {
+        const fn = graph.nodes.find(n => n.label === edge.from);
+        const tn = graph.nodes.find(n => n.label === edge.to);
+        const dx = tn.x - fn.x, dy = tn.y - fn.y;
+        const len = Math.hypot(dx, dy), angle = Math.atan2(dy, dx);
+        const x1 = fn.x + NODE_R * Math.cos(angle), y1 = fn.y + NODE_R * Math.sin(angle);
+        const x2 = tn.x - (NODE_R+5) * Math.cos(angle), y2 = tn.y - (NODE_R+5) * Math.sin(angle);
+        const px = -dy / len, py = dx / len;
+        edge.lx = (x1+x2)/2 + px * 14;
+        edge.ly = (y1+y2)/2 + py * 14;
+    }
+}
+
+function getEdgeAt(mx, my) {
+    for (const edge of graph.edges) {
+        if (edge.lx !== undefined && Math.hypot(mx - edge.lx, my - edge.ly) <= 22) return edge;
+    }
+    return null;
+}
+
+function selectFFEdge(edge) {
+    selectedEdge = edge;
+    const cap = edge.w;
+    const cur = ffEdgeFlows[edge.from][edge.to];
+    document.getElementById('ffEdgeLabel').textContent = `Flux sur ${edge.from} \u2192 ${edge.to} (capacite max : ${cap}) :`;
+    document.getElementById('ffFlowInput').value = cur > 0 ? cur : '';
+    document.getElementById('ffFlowInput').max   = cap;
+    document.getElementById('ffFlowInput').min   = 0;
+    document.getElementById('btnRemoveFlow').disabled = (cur === 0);
+    document.getElementById('ffEdgeInputRow').style.display = 'flex';
+    document.getElementById('ffHint').style.display = 'none';
+    draw();
+}
+
+function applyEdgeFlow() {
+    if (!selectedEdge) return;
+    const input = document.getElementById('ffFlowInput');
+    const val   = parseInt(input.value);
+    if (isNaN(val) || val < 0 || val > selectedEdge.w) {
+        showMessage(`Flux invalide ! Doit etre entre 0 et ${selectedEdge.w}.`, 'error');
+        return;
+    }
+    ffEdgeFlows[selectedEdge.from][selectedEdge.to] = val;
+    document.getElementById('btnRemoveFlow').disabled = (val === 0);
+    clearMessage();
+    updateFFTotal();
+    draw();
+}
+
+function removeEdgeFlow() {
+    if (!selectedEdge) return;
+    ffEdgeFlows[selectedEdge.from][selectedEdge.to] = 0;
+    document.getElementById('ffFlowInput').value = '';
+    document.getElementById('btnRemoveFlow').disabled = true;
+    updateFFTotal();
+    draw();
+}
+
+function updateFFTotal() {
+    const labels = graph.nodes.map(n => n.label);
+    let total = 0;
+    for (const l of labels) total += ffEdgeFlows[source][l] || 0;
+    document.getElementById('ffTotalDisplay').textContent = total;
+}
+
+function validateFFFlows() {
+    const labels = graph.nodes.map(n => n.label);
+    // Check capacity constraints
+    for (const e of graph.edges) {
+        const f = ffEdgeFlows[e.from][e.to];
+        if (f > e.w) return { ok: false, msg: `Flux ${e.from}->${e.to} depasse la capacite (${f} > ${e.w}) !` };
+        if (f < 0)   return { ok: false, msg: `Flux negatif sur ${e.from}->${e.to} !` };
+    }
+    // Check flow conservation for intermediate nodes
+    for (const node of graph.nodes) {
+        if (node.label === source || node.label === dest) continue;
+        let inF = 0, outF = 0;
+        for (const l of labels) {
+            inF  += ffEdgeFlows[l][node.label] || 0;
+            outF += ffEdgeFlows[node.label][l] || 0;
+        }
+        if (inF !== outF) return { ok: false, msg: `Conservation violee au noeud ${node.label} : entrant=${inF}, sortant=${outF}` };
+    }
+    // Total flow
+    let total = 0;
+    for (const l of labels) total += ffEdgeFlows[source][l] || 0;
+    return { ok: true, total };
+}
+
+function ffValider() {
+    if (gameOver) return;
+    const result = validateFFFlows();
+    if (!result.ok) {
+        lives--; updateLives();
+        if (lives <= 0) {
+            gameOver = true;
+            ffOptFlows = computeMaxFlowFull(graph.nodes, graph.edges, source, dest).flow;
+            showMessage(`Game Over ! La solution optimale est affichee en vert (flux max = ${ffMaxFlow}).`, 'gameover');
+            draw();
+        } else {
+            showMessage(`Faux : ${result.msg} — ${lives} vie${lives>1?'s':''} restante${lives>1?'s':''}.`, 'error');
+        }
+        return;
+    }
+    if (result.total !== ffMaxFlow) {
+        lives--; updateLives();
+        if (lives <= 0) {
+            gameOver = true;
+            ffOptFlows = computeMaxFlowFull(graph.nodes, graph.edges, source, dest).flow;
+            showMessage(`Game Over ! Le flux max etait ${ffMaxFlow}, pas ${result.total}. Solution affichee en vert.`, 'gameover');
+            draw();
+        } else {
+            showMessage(`Conservation OK, mais le flux ${result.total} n'est pas le maximum. ${lives} vie${lives>1?'s':''} restante${lives>1?'s':''}.`, 'error');
+        }
+        return;
+    }
+    // Correct !
+    score++;
+    document.getElementById('scoreDisplay').textContent = `Score : ${score}`;
+    gameOver = true;
+    ffOptFlows = ffEdgeFlows; // player's solution is optimal
+    showMessage(`Bravo ! Le flux maximum est bien ${ffMaxFlow}. Solution parfaite !`, 'success');
+    draw();
+    setTimeout(() => { if (confirm('Felicitations ! Voulez-vous un nouveau graphe ?')) newGame(); }, 400);
+}
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function getNodeAt(mx, my) {
+    for (const n of graph.nodes) { if (Math.hypot(mx - n.x, my - n.y) <= NODE_R + 5) return n; }
+    return null;
+}
+function getAdjacentBF(label) {
+    return graph.edges.filter(e => e.from === label).map(e => e.to);
+}
+function isInPath(path, from, to) {
+    for (let i = 0; i < path.length - 1; i++) if (path[i]===from && path[i+1]===to) return true;
+    return false;
+}
+
+// ─── Draw BF ──────────────────────────────────────────────────────────────────
+
+// Calcule la geometrie d'une arete BF (positions, courbe, point d'etiquette)
+function edgeGeomBF(edge) {
+    const fn = graph.nodes.find(n => n.label === edge.from);
+    const tn = graph.nodes.find(n => n.label === edge.to);
+    const dx = tn.x - fn.x, dy = tn.y - fn.y;
+    const len = Math.hypot(dx, dy), angle = Math.atan2(dy, dx);
+    const x1 = fn.x + NODE_R * Math.cos(angle);
+    const y1 = fn.y + NODE_R * Math.sin(angle);
+    const x2 = tn.x - (NODE_R + 20) * Math.cos(angle);
+    const y2 = tn.y - (NODE_R + 20) * Math.sin(angle);
+    const curveDir = 0;
+    const px = -dy / len, py = dx / len;
+    const cpx = (x1 + x2) / 2;
+    const cpy = (y1 + y2) / 2;
+    const aa  = angle;
+    const mx  = (x1 + x2) / 2;
+    const my  = (y1 + y2) / 2;
+    const nlx = mx + px * 16;
+    const nly = my + py * 16;
+    return { fn, tn, x1, y1, x2, y2, cpx, cpy, curveDir, aa, nlx, nly, mx, my };
+}
+
+// Retourne les segments dessinables d'une ligne en excluant les nœuds intermédiaires
+function getDrawableSegments(x1, y1, x2, y2, nodes, fromLabel, toLabel) {
+    const dx = x2 - x1, dy = y2 - y1;
+    const len2 = dx * dx + dy * dy;
+    const r = NODE_R + 12;
+    const clips = [];
+
+    for (const node of nodes) {
+        if (node.label === fromLabel || node.label === toLabel) continue;
+        const fx = x1 - node.x, fy = y1 - node.y;
+        const a = len2;
+        const b = 2 * (fx * dx + fy * dy);
+        const c = fx * fx + fy * fy - r * r;
+        const disc = b * b - 4 * a * c;
+        if (disc < 0) continue;
+        const sq = Math.sqrt(disc);
+        const t1 = (-b - sq) / (2 * a);
+        const t2 = (-b + sq) / (2 * a);
+        if (t2 < 0 || t1 > 1) continue;
+        clips.push([Math.max(0, t1), Math.min(1, t2)]);
+    }
+
+    if (clips.length === 0) return [[x1, y1, x2, y2]];
+
+    clips.sort((a, b) => a[0] - b[0]);
+    const merged = [clips[0]];
+    for (let i = 1; i < clips.length; i++) {
+        const last = merged[merged.length - 1];
+        if (clips[i][0] <= last[1]) last[1] = Math.max(last[1], clips[i][1]);
+        else merged.push(clips[i]);
+    }
+
+    const segs = [];
+    let t = 0;
+    for (const [t1, t2] of merged) {
+        if (t < t1 - 0.001) segs.push([x1 + t * dx, y1 + t * dy, x1 + t1 * dx, y1 + t1 * dy]);
+        t = t2;
+    }
+    if (t < 1 - 0.001) segs.push([x1 + t * dx, y1 + t * dy, x2, y2]);
+    return segs.length > 0 ? segs : [];
+}
+
+// Repousse les étiquettes qui se chevauchent ou qui couvrent un nœud
+function resolveLabelPositions(labelData, nodes) {
+    const MIN_LL = 30, MIN_LN = NODE_R + 18;
+    for (let iter = 0; iter < 18; iter++) {
+        for (const d of labelData) {
+            for (const node of nodes) {
+                const dx = d.lx - node.x, dy = d.ly - node.y;
+                const dist = Math.hypot(dx, dy);
+                if (dist < MIN_LN && dist > 0.1) {
+                    const push = MIN_LN - dist;
+                    d.lx += (dx / dist) * push;
+                    d.ly += (dy / dist) * push;
+                }
+            }
+        }
+        for (let i = 0; i < labelData.length; i++) {
+            for (let j = i + 1; j < labelData.length; j++) {
+                const a = labelData[i], b = labelData[j];
+                const dx = b.lx - a.lx, dy = b.ly - a.ly;
+                const dist = Math.hypot(dx, dy);
+                if (dist < MIN_LL && dist > 0.1) {
+                    const push = (MIN_LL - dist) / 2;
+                    const nx = dx / dist, ny = dy / dist;
+                    a.lx -= nx * push; a.ly -= ny * push;
+                    b.lx += nx * push; b.ly += ny * push;
+                }
+            }
+        }
+    }
+    for (const d of labelData) {
+        d.lx = Math.max(15, Math.min(canvas.width - 15, d.lx));
+        d.ly = Math.max(15, Math.min(canvas.height - 15, d.ly));
+    }
+}
+
+function drawBF() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#0d1117'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Pre-calcul de toutes les geometries + couleurs
+    const edgeData = graph.edges.map(edge => {
+        const geom = edgeGeomBF(edge);
+        let color = '#484f58', lineW = 1.5;
+        if (isInPath(selectedPath, edge.from, edge.to))                 { color = '#ffa657'; lineW = 3; }
+        else if (gameOver && isInPath(correctPath, edge.from, edge.to)) { color = '#39d353';  lineW = 4; }
+        return { edge, geom, color, lineW, lx: geom.nlx, ly: geom.nly, ox: geom.mx, oy: geom.my };
+    });
+
+    resolveLabelPositions(edgeData, graph.nodes);
+
+    // PASSE 1 : lignes seulement
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.setLineDash([]);
+    for (const { edge, geom, color, lineW } of edgeData) {
+        const { x1, y1, x2, y2, cpx, cpy, curveDir } = geom;
+        ctx.strokeStyle = color; ctx.lineWidth = lineW;
+        ctx.beginPath();
+        if (curveDir !== 0) {
+            ctx.moveTo(x1,y1); ctx.quadraticCurveTo(cpx,cpy,x2,y2);
+        } else {
+            const segs = getDrawableSegments(x1, y1, x2, y2, graph.nodes, edge.from, edge.to);
+            for (const [sx,sy,ex,ey] of segs) { ctx.moveTo(sx,sy); ctx.lineTo(ex,ey); }
+        }
+        ctx.stroke();
+    }
+
+    // PASSE 1.5 : lignes pointillées connecteurs (avant labels)
+    ctx.setLineDash([4, 4]); ctx.lineWidth = 1;
+    for (const { color, lx, ly, ox, oy } of edgeData) {
+        if (Math.hypot(lx - ox, ly - oy) < 6) continue;
+        ctx.strokeStyle = color === '#484f58' ? '#3a3f47' : color + '88';
+        ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(ox, oy); ctx.stroke();
+    }
+    ctx.setLineDash([]);
+
+    // PASSE 2 : etiquettes des poids
+    ctx.font = 'bold 15px Segoe UI,Arial';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    for (const { edge, color, lx, ly } of edgeData) {
+        const text = String(edge.w);
+        const tw   = ctx.measureText(text).width;
+        ctx.fillStyle = 'rgba(13,17,23,0.97)';
+        ctx.fillRect(lx - tw/2 - 7, ly - 11, tw + 14, 22);
+        ctx.fillStyle = color === '#484f58' ? '#e6edf3' : color;
+        ctx.fillText(text, lx, ly);
+    }
+
+    // PASSE 2.5 : points d'ancrage + flèches (après labels)
+    for (const { edge, geom, color, lineW } of edgeData) {
+        const { x2, y2, aa } = geom;
+        const pulse = gameOver && isInPath(correctPath, edge.from, edge.to)
+            ? (pulseRaf !== null ? 8 + 12 * Math.abs(Math.sin(pulseTimer)) : 14) : 0;
+        if (pulse) { ctx.shadowColor = '#39d353'; ctx.shadowBlur = pulse; }
+        ctx.fillStyle = color;
+        const hl = 11, ha = Math.PI / 6;
+        ctx.beginPath(); ctx.moveTo(x2, y2);
+        ctx.lineTo(x2 - hl*Math.cos(aa-ha), y2 - hl*Math.sin(aa-ha));
+        ctx.lineTo(x2 - hl*Math.cos(aa+ha), y2 - hl*Math.sin(aa+ha));
+        ctx.closePath(); ctx.fill();
+        ctx.shadowBlur = 0;
+    }
+    // Points d'ancrage
+    for (const { color, lx, ly, ox, oy } of edgeData) {
+        if (Math.hypot(lx - ox, ly - oy) < 6) continue;
+        ctx.fillStyle = color === '#484f58' ? '#8b949e' : color;
+        ctx.beginPath(); ctx.arc(ox, oy, 4, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // PASSE 3 : noeuds (par-dessus tout, couvrent les lignes qui passent au travers)
+    for (const node of graph.nodes) {
+        let fill, stroke;
+        if (node.label === source)                    { fill = '#1a4a2a'; stroke = '#39d353'; }
+        else if (node.label === dest)                 { fill = '#4a1a1a'; stroke = '#f85149'; }
+        else if (selectedPath.includes(node.label))  { fill = '#3d2b00'; stroke = '#ffa657'; }
+        else                                          { fill = '#1c2e4a'; stroke = '#388bfd'; }
+        if (gameOver && correctPath.includes(node.label)) {
+            const pulse = pulseRaf !== null ? 6 + 10 * Math.abs(Math.sin(pulseTimer)) : 12;
+            ctx.shadowColor = '#39d353'; ctx.shadowBlur = pulse;
+        } else if (selectedPath[selectedPath.length-1] === node.label && !gameOver) {
+            ctx.shadowColor = stroke; ctx.shadowBlur = 16;
+        }
+        ctx.beginPath(); ctx.arc(node.x, node.y, NODE_R, 0, Math.PI * 2);
+        ctx.fillStyle = fill; ctx.fill();
+        ctx.strokeStyle = stroke; ctx.lineWidth = 2.5; ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#e6edf3'; ctx.font = 'bold 15px Segoe UI,Arial';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(node.label, node.x, node.y);
+    }
+}
+
+// ─── Draw FF ──────────────────────────────────────────────────────────────────
+
+function drawFF() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle='#0d1117'; ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    const nodeLabels = graph.nodes.map(n => n.label);
+
+    // Calcul geometrie + style pour toutes les aretes
+    const ffData = graph.edges.map(edge => {
+        const fn=graph.nodes.find(n=>n.label===edge.from);
+        const tn=graph.nodes.find(n=>n.label===edge.to);
+        const isSelected = selectedEdge && selectedEdge.from===edge.from && selectedEdge.to===edge.to;
+        const dx=tn.x-fn.x, dy=tn.y-fn.y, len=Math.hypot(dx,dy), angle=Math.atan2(dy,dx);
+        const x1=fn.x+NODE_R*Math.cos(angle), y1=fn.y+NODE_R*Math.sin(angle);
+        const x2=tn.x-(NODE_R+14)*Math.cos(angle), y2=tn.y-(NODE_R+14)*Math.sin(angle);
+        const px=-dy/len, py=dx/len;
+        let label, color, lineW, glow=false;
+        if (gameOver) {
+            const optFlow = ffOptFlows[edge.from][edge.to] || 0;
+            label=`${optFlow}/${edge.w}`; color='#484f58'; lineW=1.5;
+            if (optFlow > 0) { color=optFlow===edge.w?'#3a8a3a':'#39d353'; lineW=3; glow=true; }
+            if (isSelected) { color='#ffa657'; lineW=3; }
+        } else {
+            const flow=ffEdgeFlows[edge.from][edge.to]||0;
+            label=`${flow}/${edge.w}`; color=flow>0?'#39d353':'#484f58'; lineW=flow>0?2.5:1.5;
+            if (isSelected) { color='#ffa657'; lineW=3; }
+        }
+        const emx=(x1+x2)/2, emy=(y1+y2)/2;
+        return { fn, tn, x1, y1, x2, y2, angle, label, color, lineW, glow,
+                 lx:emx+px*13, ly:emy+py*13, ox:emx, oy:emy };
+    });
+
+    resolveLabelPositions(ffData, graph.nodes);
+
+    // Passe 1 : lignes + fleches
+    ctx.lineCap='round'; ctx.lineJoin='round'; ctx.setLineDash([]);
+    // Passe 1 : lignes seulement
+    for (const d of ffData) {
+        ctx.strokeStyle=d.color; ctx.lineWidth=d.lineW;
+        const segsFF = getDrawableSegments(d.x1, d.y1, d.x2, d.y2, graph.nodes, d.fn.label, d.tn.label);
+        ctx.beginPath();
+        for (const [sx,sy,ex,ey] of segsFF) { ctx.moveTo(sx,sy); ctx.lineTo(ex,ey); }
+        ctx.stroke();
+    }
+
+    // Passe 1.5 : lignes pointillées connecteurs (avant labels)
+    ctx.setLineDash([4, 4]); ctx.lineWidth = 1;
+    for (const d of ffData) {
+        if (Math.hypot(d.lx - d.ox, d.ly - d.oy) < 6) continue;
+        ctx.strokeStyle = d.color === '#484f58' ? '#3a3f47' : d.color + '88';
+        ctx.beginPath(); ctx.moveTo(d.lx, d.ly); ctx.lineTo(d.ox, d.oy); ctx.stroke();
+    }
+    ctx.setLineDash([]);
+
+    // Passe 2 : etiquettes avec positions resolues
+    ctx.font='bold 14px Segoe UI,Arial'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    for (const d of ffData) {
+        const tw=ctx.measureText(d.label).width;
+        ctx.fillStyle='rgba(13,17,23,0.97)'; ctx.fillRect(d.lx-tw/2-7,d.ly-11,tw+14,22);
+        ctx.fillStyle=d.color==='#484f58'?'#e6edf3':d.color; ctx.fillText(d.label,d.lx,d.ly);
+    }
+
+    // Passe 2.5 : flèches + points d'ancrage (après labels)
+    for (const d of ffData) {
+        if (d.glow) { ctx.shadowColor='#39d353'; ctx.shadowBlur=10; }
+        ctx.fillStyle=d.color;
+        const hl=11, ha=Math.PI/6;
+        ctx.beginPath(); ctx.moveTo(d.x2,d.y2);
+        ctx.lineTo(d.x2-hl*Math.cos(d.angle-ha),d.y2-hl*Math.sin(d.angle-ha));
+        ctx.lineTo(d.x2-hl*Math.cos(d.angle+ha),d.y2-hl*Math.sin(d.angle+ha));
+        ctx.closePath(); ctx.fill(); ctx.shadowBlur=0;
+    }
+    for (const d of ffData) {
+        if (Math.hypot(d.lx - d.ox, d.ly - d.oy) < 6) continue;
+        ctx.fillStyle = d.color === '#484f58' ? '#8b949e' : d.color;
+        ctx.beginPath(); ctx.arc(d.ox, d.oy, 4, 0, Math.PI * 2); ctx.fill();
+    }
+
+    const labels = nodeLabels;
+
+    // Conservation indicators sur les noeuds intermediaires
+    if (!gameOver) {
+        for (const node of graph.nodes) {
+            if (node.label === source || node.label === dest) continue;
+            let inF = 0, outF = 0;
+            for (const l of labels) { inF += ffEdgeFlows[l][node.label]||0; outF += ffEdgeFlows[node.label][l]||0; }
+            const balance = inF - outF;
+            if (inF > 0 || outF > 0) {
+                const balanced = balance === 0;
+                ctx.font = 'bold 10px Segoe UI,Arial'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+                ctx.fillStyle = balanced ? '#56d364' : '#ff7b72';
+                const txt = balanced ? `=${inF}` : `${balance>0?'+':''}${balance}`;
+                ctx.fillText(txt, node.x, node.y + NODE_R + 4);
+            }
+        }
+        // Source: total sortant
+        let srcOut = 0;
+        for (const l of labels) srcOut += ffEdgeFlows[source]?.[l] || 0;
+        if (srcOut > 0) {
+            ctx.font='bold 10px Segoe UI,Arial'; ctx.textAlign='center'; ctx.textBaseline='top';
+            ctx.fillStyle='#ffa657'; ctx.fillText(`\u2192${srcOut}`, graph.nodes.find(n=>n.label===source).x, graph.nodes.find(n=>n.label===source).y + NODE_R + 4);
+        }
+    }
+
+    // Noeuds
+    for (const node of graph.nodes) {
+        let fill, stroke;
+        if (node.label===source)       { fill='#1a4a2a'; stroke='#39d353'; }
+        else if (node.label===dest)    { fill='#4a1a1a'; stroke='#f85149'; }
+        else                           { fill='#1c2e4a'; stroke='#388bfd'; }
+        const isSelected = selectedEdge && (selectedEdge.from===node.label || selectedEdge.to===node.label);
+        if (isSelected && !gameOver) { stroke = '#ffa657'; ctx.shadowColor='#ffa657'; ctx.shadowBlur=10; }
+        if (gameOver) { ctx.shadowColor='#39d353'; ctx.shadowBlur=8; }
+        ctx.beginPath(); ctx.arc(node.x,node.y,NODE_R,0,Math.PI*2);
+        ctx.fillStyle=fill; ctx.fill();
+        ctx.strokeStyle=stroke; ctx.lineWidth=2.5; ctx.stroke(); ctx.shadowBlur=0;
+        ctx.fillStyle='#e6edf3'; ctx.font='bold 15px Segoe UI,Arial';
+        ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(node.label,node.x,node.y);
+    }
+
+    // Bandeau "Solution optimale" sur game over
+    if (gameOver) {
+        ctx.fillStyle='rgba(13,17,23,0.75)';
+        ctx.fillRect(0, canvas.height-44, canvas.width, 44);
+        ctx.fillStyle='#39d353'; ctx.font='bold 15px Segoe UI,Arial';
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText(`Solution optimale \u2014 Flux maximum = ${ffMaxFlow}`, canvas.width/2, canvas.height-22);
+    }
+}
+
+function draw() {
+    if (mode === 'ff') { drawFF(); return; }
+    drawBF();
+}
+
+// ─── Interaction canvas ───────────────────────────────────────────────────────
+
+canvas.addEventListener('click', e => {
+    if (gameOver) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const mx = (e.clientX - rect.left) * (canvas.width  / rect.width);
+    const my = (e.clientY - rect.top)  * (canvas.height / rect.height);
+
+    if (mode === 'ff') {
+        const edge = getEdgeAt(mx, my);
+        if (edge) { selectFFEdge(edge); return; }
+        // Clic dans le vide = deselectionner
+        selectedEdge = null;
+        document.getElementById('ffEdgeInputRow').style.display = 'none';
+        document.getElementById('ffHint').style.display = '';
+        draw();
+        return;
+    }
+
+    // Mode BF : clic sur un noeud
+    const clicked = getNodeAt(mx, my);
+    if (!clicked) return;
+    const label = clicked.label;
+    const last  = selectedPath[selectedPath.length - 1];
+
+    if (selectedPath.length === 0) {
+        if (label === source) { selectedPath = [source]; updateUI(); }
+        else showMessage(`Commencez depuis la source : ${source}`, 'info');
+        return;
+    }
+    if (label === last) {
+        if (selectedPath.length > 1) { selectedPath.pop(); clearMessage(); updateUI(); }
+        return;
+    }
+    if (!getAdjacentBF(last).includes(label)) {
+        showMessage(`Pas d'arete de ${last} vers ${label} !`, 'error'); return;
+    }
+    if (selectedPath.includes(label)) {
+        showMessage(`${label} est deja dans le chemin !`, 'error'); return;
+    }
+    selectedPath.push(label); clearMessage(); updateUI();
+});
+
+// ─── UI helpers ───────────────────────────────────────────────────────────────
+
+function updateUI() {
+    const pathEl = document.getElementById('pathDisplay');
+    const btnUndo = document.getElementById('btnUndo');
+    pathEl.textContent = selectedPath.length === 0
+        ? `Cliquez sur ${source} pour commencer`
+        : selectedPath.join(' -> ');
+    const last = selectedPath[selectedPath.length - 1];
+    btnUndo.disabled = selectedPath.length <= 1;
+    document.getElementById('btnValider').disabled =
+        !(last === dest && selectedPath.length >= 2 && !gameOver);
+    draw();
+}
+
+function showMessage(text, type) {
+    const el = document.getElementById('message');
+    el.textContent = text; el.className = `message msg-${type}`;
+}
+function clearMessage() {
+    const el = document.getElementById('message'); el.textContent = ''; el.className = 'message';
+}
+function updateLives() {
+    let d = '';
+    for (let i = 0; i < 3; i++) d += i < lives ? '\u2764\uFE0F' : '\uD83D\uDDA4';
+    document.getElementById('livesDisplay').textContent = d;
+}
+
+// ─── Boutons ─────────────────────────────────────────────────────────────────
+
+function undoStep() {
+    if (selectedPath.length > 1) { selectedPath.pop(); clearMessage(); updateUI(); }
+}
+
+function resetAction() {
+    if (mode === 'ff') {
+        if (!Object.values(ffEdgeFlows).some(obj => Object.values(obj).some(v => v > 0))) return;
+        if (!confirm('Effacer tous les flux assignes ?')) return;
+        initFFState();
+        clearMessage(); draw();
+    } else {
+        selectedPath = [source]; clearMessage(); updateUI();
+    }
+}
+
+function showIndice() {
+    if (gameOver || indiceDone) return;
+    indiceDone = true; lives--; updateLives();
+    document.getElementById('btnIndice').disabled = true;
+    const optimal = reconstructPath(bfResult.prev, dest);
+    showMessage(`Indice : depuis ${source}, le premier pas optimal est vers ${optimal[1]}. (-1 vie)`, 'info');
+    if (lives <= 0) {
+        gameOver = true; correctPath = optimal;
+        document.getElementById('btnValider').disabled = true;
+        showMessage(`Game Over ! Le plus court chemin : ${optimal.join(' -> ')} (cout : ${bfResult.dist[dest]})`, 'gameover');
+        startPulse();
+    }
+}
+
+function valider() {
+    if (gameOver) return;
+    const cost    = pathCostBF(selectedPath);
+    const optimal = bfResult.dist[dest];
+
+    // Securite : verifier que bfResult correspond bien au graphe actuel
+    const check = bellmanFord(graph.nodes, graph.edges, source);
+    if (check.dist[dest] !== optimal) {
+        // bfResult etait desynchronise, recalculer
+        bfResult = check;
+    }
+
+    if (cost === optimal) {
+        score++; document.getElementById('scoreDisplay').textContent = `Score : ${score}`;
+        gameOver = true; correctPath = [...selectedPath];
+        showMessage(`Bravo ! Chemin ${selectedPath.join(' -> ')} = ${cost}. C'est le plus court !`, 'success');
+        startPulse();
+        setTimeout(() => { if (confirm('Felicitations ! Voulez-vous un nouveau graphe ?')) newGame(); }, 800);
+    } else {
+        lives--; updateLives();
+        const yourCost = cost < Infinity ? `(cout : ${cost})` : '(chemin invalide)';
+        if (lives <= 0) {
+            gameOver = true; correctPath = reconstructPath(bfResult.prev, dest);
+            document.getElementById('btnValider').disabled = true;
+            showMessage(`Game Over ! Votre chemin ${yourCost} — Correct : ${correctPath.join(' -> ')} (cout : ${optimal})`, 'gameover');
+            startPulse();
+        } else {
+            showMessage(`Faux ! Votre chemin coute ${cost}, mais le minimum est ${optimal}. ${lives} vie${lives>1?'s':''} restante${lives>1?'s':''}.`, 'error');
+            selectedPath = [source]; updateUI();
+        }
+    }
+}
+
+// ─── New game ─────────────────────────────────────────────────────────────────
+
+function newGame() {
+    lives = 3; selectedPath = []; gameOver = false;
+    correctPath = []; indiceDone = false;
+    if (pulseRaf) { cancelAnimationFrame(pulseRaf); pulseRaf = null; }
+
+    if (mode === 'bf') {
+        document.getElementById('btnIndice').disabled = false;
+
+        // Generer un graphe dont le chemin optimal passe par au moins 2 noeuds intermediaires
+        let att = 0, optPath = [];
+        do {
+            graph = generateBFGraph();
+            const lb = graph.nodes.map(n => n.label);
+            source = lb[0]; dest = lb[lb.length - 1];
+            bfResult = bellmanFord(graph.nodes, graph.edges, source);
+            optPath = (bfResult.dist[dest] !== Infinity)
+                ? reconstructPath(bfResult.prev, dest)
+                : [];
+            att++;
+        } while ((optPath.length < 4) && att < 80);
+        // optPath.length < 4 = moins de 3 noeuds intermediaires entre source et dest
+        // => force au moins source -> X -> Y -> dest
+
+        // Securite : si toujours trop court, supprimer les raccourcis directs
+        // et forcer un chemin en 3 etapes
+        if (optPath.length < 4) {
+            // Retirer l'arete directe source->dest si elle est la plus courte
+            graph.edges = graph.edges.filter(e => !(e.from === source && e.to === dest));
+            // Ajouter un chemin force en 2 etapes via le 2eme noeud
+            const mid1 = graph.nodes.find(n => n.label !== source && n.label !== dest);
+            const mid2 = graph.nodes.find(n => n.label !== source && n.label !== dest && n.label !== mid1?.label);
+            if (mid1 && mid2) {
+                graph.edges.push({ from: source, to:   mid1.label, w: rnd(1, 8) });
+                graph.edges.push({ from: mid1.label, to: mid2.label, w: rnd(1, 8) });
+                graph.edges.push({ from: mid2.label, to: dest,       w: rnd(1, 8) });
+            } else if (mid1) {
+                graph.edges.push({ from: source, to: mid1.label, w: rnd(1, 8) });
+                graph.edges.push({ from: mid1.label, to: dest,   w: rnd(1, 8) });
+            }
+            bfResult = bellmanFord(graph.nodes, graph.edges, source);
+            optPath  = reconstructPath(bfResult.prev, dest);
+        }
+
+        selectedPath = [source];
+        document.getElementById('taskDisplay').textContent =
+            `Plus court chemin : ${source} \u2192 ${dest}`;
+        clearMessage(); updateUI();
+    } else {
+        let att = 0;
+        do {
+            graph = generateFFGraph();
+            const lb = graph.nodes.map(n => n.label);
+            source = lb[0]; dest = lb[lb.length - 1];
+            const res = computeMaxFlowFull(graph.nodes, graph.edges, source, dest);
+            ffMaxFlow = res.maxFlow;
+            att++;
+        } while (ffMaxFlow === 0 && att < 30);
+        if (ffMaxFlow === 0) {
+            graph.edges.push({ from: source, to: dest, w: rnd(3,10) });
+            ffMaxFlow = computeMaxFlowFull(graph.nodes, graph.edges, source, dest).maxFlow;
+        }
+        computeEdgeLabelPos();
+        initFFState();
+        document.getElementById('ffSrcLabel').textContent = source;
+        document.getElementById('taskDisplay').textContent = `Flux maximum : ${source} \u2192 ${dest}`;
+        showMessage(`Cliquez sur les aretes pour assigner un flux (flux/capacite). Respectez la conservation !`, 'info');
+        draw();
+    }
+
+    updateLives();
+}
+
+newGame();
+</script>
+</body>
+</html>

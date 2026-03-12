@@ -1,0 +1,185 @@
+---
+layout: post
+title:  "UI Battle"
+date:   2026-02-14 14:00:00 +0100
+categories: Blog_Post UI Battle
+hidden : true
+---
+
+## Introduction : L'Interface de Combat
+
+**Aujourd'hui, je vous présente l'un des éléments les plus importants de Metroid Vania : l'interface de combat au tour par tour.**
+
+L'UI de combat, c'est le lien entre le joueur et les mécaniques du jeu. Elle doit être **claire, lisible et intuitive**, tout en restant fidèle à l'ambiance du projet. Pour la concevoir, je me suis fortement inspiré de [Dragon Quest VI](https://fr.wikipedia.org/wiki/Dragon_Quest_VI_:_Les_Royaumes_du_Rêve), dont l'interface sobre et efficace colle parfaitement aux contraintes de mon projet.
+
+Dans cet article, je vous explique mes choix de design, comment j'ai développé cette interface, et où j'en suis.
+
+> **Note :** Les images des personnages visibles dans les cadres de l'UI ne sont **pas définitives** — il s'agit principalement d'un seul modèle placeholder utilisé pour les tests. Les vrais sprites des personnages seront intégrés plus tard.
+
+---
+
+## La Référence Principale : Dragon Quest VI
+
+Avant de commencer, j'ai fait des recherches pour voir si des [Metroidvania](https://fr.wikipedia.org/wiki/Metroidvania) au tour par tour existaient déjà. Le plus proche que j'ai trouvé est *[Indivisible](https://fr.wikipedia.org/wiki/Indivisible_(jeu_vidéo))*, mais ce n'est pas vraiment du tour par tour pur — plutôt un hybride.
+
+Je me suis donc tourné vers les RPG traditionnels. Étant donné que mes assets comportent peu d'animations, je cherchais un jeu où le combat ne repose pas sur des animations complexes. C'est là que [Dragon Quest VI](https://fr.wikipedia.org/wiki/Dragon_Quest_VI_:_Les_Royaumes_du_Rêve) s'est imposé comme référence évidente.
+
+<img src="/image/UI_Dragon_Quest_IV.jpg" alt="Dragon Quest VI UI Reference" width="800">
+
+Ce qui m'a séduit :
+- Le personnage joueur **n'apparaît pas sur le champ de bataille**
+- Les ennemis **n'ont pas d'animations de combat complexes**
+- Les attaques sont représentées par de simples **flashs de couleur** sur le sprite ennemi
+- L'interface est **claire et lisible** au premier coup d'œil
+
+---
+
+## Mon Interface de Combat
+
+En m'appuyant sur cette référence, j'ai conçu mon propre menu de combat avec les options suivantes :
+
+**Menu principal :**
+- **COMBATTRE** – Ouvre le menu d'actions du combattant dont c'est le tour
+- **EQUIPE** – Permet de changer les combattants actif pendant le combat
+- **INVOCATION** – Invoquer une créature puissante qui remplace temporairement tous les combattants sur le terrain
+- **FUIR** – Tenter de fuir le combat
+
+**Menu d'actions du combattant :**
+- **ATTAQUE** – Coup physique standard
+- **SPECIAL** – Capacités spéciales du personnage
+- **OBJET** – Utiliser un objet de l'inventaire (potion, etc.)
+- **DEFENSE** – Se mettre en posture défensive
+
+<div style="display:flex; gap:20px; align-items:flex-start;">
+  <figure style="flex:1; text-align:center;">
+    <img src="/image/UI_Battle_General_Metroid_Vania.png" alt="Menu général" style="width:100%;">
+    <figcaption><em>Menu général — vue d'ensemble de l'équipe</em></figcaption>
+  </figure>
+  <figure style="flex:1; text-align:center;">
+    <img src="/image/UI_Battle_Combatent_Metroid_Vania.png" alt="Menu de combat" style="width:100%;">
+    <figcaption><em>Menu de combat — actions du combattant actif</em></figcaption>
+  </figure>
+</div>
+
+---
+
+## Les Choix Techniques
+
+### Contrôles
+J'ai décidé que le jeu sera joué **exclusivement au clavier et à la manette** — pas de souris. Ce choix est volontaire : il donne une expérience plus console, plus old-school, en accord avec le feeling [Dragon Quest](https://fr.wikipedia.org/wiki/Dragon_Quest).
+
+### Feedback Visuel
+Pour représenter les attaques sans animations lourdes, j'utilise des **flashs de couleur** sur les sprites ennemis — exactement comme dans les premiers Dragon Quest. C'est simple, efficace, et ça fonctionne parfaitement avec mes assets.
+
+<div style="display:flex; gap:20px; align-items:flex-start;">
+  <figure style="flex:1; text-align:center;">
+    <img src="/image/Ui_Battle_Attack_Flash.gif" alt="Flash attaque 1" style="width:100%;">
+    <figcaption><em>Fait une attaque</em></figcaption>
+  </figure>
+  <figure style="flex:1; text-align:center;">
+    <img src="/image/Ui_Battle_Hit_Flash.gif" alt="Flash attaque 2" style="width:100%;">
+    <figcaption><em>Prend un dégat</em></figcaption>
+  </figure>
+</div>
+
+### Informations du Groupe
+
+Chaque combattant dispose d'un panneau d'informations qui affiche en temps réel son état pendant le combat. L'interface est organisée en deux zones distinctes :
+
+- À **gauche** : les **effets de statut** — altérations comme la brûlure, le poison, le gel, etc.
+- À **droite** : les **bonus et malus** — modificateurs temporaires sur les stats (attaque boostée, défense réduite, etc.)
+
+Chaque icône d'effet ou de bonus/malus affiche un **chiffre dans son coin** — ce chiffre représente le **nombre de tours qu'il reste** avant que cet effet disparaisse. Par exemple, une brûlure avec un "3" dessus durera encore 3 tours avant de s'effacer automatiquement.
+
+Le cadre de chaque combattant contient également plusieurs informations clés :
+- **Nom** (affiché en haut) — actuellement "name test", remplacé par le vrai nom du personnage
+- **Rond en bas à droite** — le **niveau** du combattant
+- **Rond en bas à gauche** — l'**élément** du personnage (feu, glace, etc.)
+- **Barre rouge** — les **points de vie (HP)**
+- **Barre bleue** — la **mana**
+- **Barre jaune** — les **points d'action (AP)**
+
+L'image peut paraître chargée, mais en pratique, il est rare d'avoir tous les effets actifs en même temps. Dans une situation de combat normale, seuls quelques icônes apparaîtront, ce qui garde l'interface **lisible et claire**.
+
+<img src="/image/UI_Battle_Info_Groupe_Metroid_Vania.png" alt="Informations du groupe" width="800">
+
+### Informations de l'Ennemi
+
+Les ennemis disposent eux aussi d'un panneau d'information, plus sobre que celui des combattants :
+
+- **Barre rouge** — les **points de vie (HP)**
+- **Rond à gauche** — l'**élément** de l'ennemi
+- **Rond à droite** — son **niveau**
+
+<img src="/image/UI_Battle_Info_Enemie_Metroid_Vania.png" alt="Informations de l'ennemi" width="800">
+
+### Invocations et Changement de Combattant
+
+Ces deux menus partagent la même base d'interface, mais avec des différences importantes selon le contexte.
+
+<div style="display:flex; gap:20px; align-items:flex-start;">
+  <figure style="flex:1; text-align:center;">
+    <img src="/image/UI_Battle_Invocation_Metroid_Vania.png" alt="Menu Invocation" style="width:100%;">
+    <figcaption><em>Menu d'invocation — choisir une créature</em></figcaption>
+  </figure>
+  <figure style="flex:1; text-align:center;">
+    <img src="/image/UI_Battle_Changer_Combatant_Metroid_Vania.png" alt="Menu Changer Combattant" style="width:100%;">
+    <figcaption><em>Menu de changement — choisir un combattant</em></figcaption>
+  </figure>
+</div>
+
+**Différences entre les deux :**
+
+- **Combattant** : chaque carte affiche l'**élément** et le **niveau** du personnage. Après avoir choisi le combattant entrant, une deuxième étape s'affiche pour **choisir quel combattant remplacer** dans l'équipe active.
+
+<img src="/image/UI_Battle_Qui_Changer_Metroid_Vania.png" alt="Choisir qui remplacer" width="800">
+
+- **Invocation** : chaque carte affiche uniquement l'**élément** de la créature — pas de niveau. De plus, il n'y a **pas de choix de remplacement** : la créature invoquée remplace automatiquement tous les combattants actifs sur le terrain.
+
+### Système de Timer — Barre de Priorité
+
+Pour rendre l'ordre des tours lisible en un coup d'œil, j'ai mis en place une **barre de priorité** qui indique qui joue et quand chaque combattant jouera à son tour.
+
+Le fonctionnement est le suivant : chaque combattant possède un **cadre** qui monte progressivement sur la barre au fil des cases. En même temps, son **cercle indicateur** — divisé en **4 parties** — se remplit petit à petit.
+
+- Le combattant **en haut de la barre** (cercle complet, 4 parties remplies) est celui qui **joue en ce moment**
+- Les autres montent progressivement, chacun à son rythme selon ses statistiques
+
+<img src="/image/UI_Battle_Timer_Metroid_Vania.png" alt="Barre de priorité — Timer de combat" width="800">
+
+### Capacités Spéciales et Objets
+
+Les menus **SPECIAL** et **OBJET** partagent la même base d'interface : les capacités et les objets sont tous les deux affichés **par listes de 5**, pour garder une présentation cohérente, lisible et facile à naviguer. Le menu SPECIAL affiche les capacités propres au combattant actif, tandis que le menu OBJET donne accès à l'inventaire utilisable en combat.
+
+<div style="display:flex; gap:20px; align-items:flex-start;">
+  <figure style="flex:1; text-align:center;">
+    <img src="/image/UI_Battle_Special_Metroid_Vania.png" alt="Menu Spécial" style="width:100%;">
+    <figcaption><em>Menu des capacités spéciales</em></figcaption>
+  </figure>
+  <figure style="flex:1; text-align:center;">
+    <img src="/image/UI_Battle_Item_Metroid_Vania.png" alt="Menu Objets" style="width:100%;">
+    <figcaption><em>Menu des objets</em></figcaption>
+  </figure>
+</div>
+
+### Historique de Combat
+
+Pour garder le joueur informé de ce qui se passe pendant les combats, j'ai ajouté un **historique de combat** — un journal qui affiche en temps réel les actions effectuées : attaques, dégâts encaissés, sorts utilisés, etc.
+
+Je me suis inspiré de deux sources :
+- Les **logs de combat des MMO** (comme [World of Warcraft](https://fr.wikipedia.org/wiki/World_of_Warcraft)), où chaque action est tracée avec précision pour que le joueur puisse analyser ce qui s'est passé
+- **[Pokémon Mystery Dungeon](https://fr.wikipedia.org/wiki/Pok%C3%A9mon_Donjon_Myst%C3%A8re)**, qui affiche les messages d'action de façon simple et lisible, ligne par ligne, sans surcharger l'écran
+
+Le résultat est un historique **clair et minimaliste** : le joueur peut suivre le déroulement du combat d'un coup d'œil, sans avoir à mémoriser ce qui vient de se passer.
+
+> **Note :** Certains messages visibles actuellement dans les logs ne seront **pas conservés dans la version finale**, pour éviter de surcharger l'historique avec des informations de navigation inutiles — par exemple *"Le joueur choisit une Invocation"*. Seules les actions qui ont un impact réel sur le combat seront affichées.
+
+<img src="/image/UI_Battle_Historique_Metroid_Vania.png" alt="Historique de combat" width="800">
+
+---
+
+## Ce Que J'ai Appris
+
+Grâce à mes recherches, j'ai appris comment concevoir un système de combat **complexe mais épuré** : riche en possibilités stratégiques, sans pour autant noyer le joueur sous des informations inutiles.
+
+J'ai aussi compris l'importance d'un **feedback visuel simple et lisible** — des signaux clairs qui permettent au joueur de comprendre instantanément ce qui se passe à l'écran, sans avoir besoin d'explication.
