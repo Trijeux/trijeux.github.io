@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Revision Network"
-date:   2026-03-12 10:40:00 +0100
+date:   2026-03-12 10:40:00 +0200
 categories: Revision Network
 hidden : true
 ---
