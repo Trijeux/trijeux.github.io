@@ -8,9 +8,9 @@ hidden : false
 
 ## Introduction
 
-**Pour mon projet sommatif, j'ai développé un jeu de sumo en ligne en C++ avec du rollback netcode.** Le concept est simple : deux joueurs s'affrontent dans une arène circulaire et doivent pousser l'adversaire hors des limites pour marquer des points.
+**Cet article présente un projet sommatif : un jeu de sumo en ligne en C++ utilisant du rollback netcode.** Le concept est simple : deux joueurs s'affrontent dans une arène circulaire et doivent pousser l'adversaire hors des limites pour marquer des points.
 
-Ce qui rend ce projet intéressant, ce n'est pas le gameplay en lui-même — c'est tout ce qui se passe **sous le capot** pour que deux joueurs puissent jouer ensemble en ligne sans lag perceptible et sans désynchronisation. Dans cet article, j'explique les technologies utilisées, les problèmes que j'ai rencontrés et comment je les ai résolus, ainsi que des conseils pour les futurs étudiants qui devront travailler sur un projet similaire.
+Ce qui rend ce type de projet intéressant, ce n'est pas le gameplay en lui-même — c'est tout ce qui se passe **sous le capot** pour que deux joueurs puissent jouer ensemble en ligne sans lag perceptible et sans désynchronisation. Cet article explique les technologies utilisées, les problèmes typiquement rencontrés et comment les résoudre, ainsi que des conseils pour les futurs étudiants qui devront travailler sur un projet similaire.
 
 <img src="/image/Sumo_Game.png" alt="Sumo Game — Mode local" width="800">
 
@@ -20,9 +20,9 @@ Ce qui rend ce projet intéressant, ce n'est pas le gameplay en lui-même — c'
 
 ### Photon Realtime
 
-Pour la communication réseau, j'utilise **[Photon Realtime](https://www.photonengine.com/)** (ExitGames SDK). Photon gère la connexion entre les joueurs : création de salons, matchmaking, et envoi/réception de messages.
+Pour la communication réseau, le projet s'appuie sur **[Photon Realtime](https://www.photonengine.com/)** (ExitGames SDK). Photon gère la connexion entre les joueurs : création de salons, matchmaking, et envoi/réception de messages.
 
-J'utilise deux types d'envoi :
+Deux types d'envoi sont utilisés :
 - **Unreliable (UDP)** — pour les **inputs des joueurs** (envoyés chaque frame). La perte d'un paquet n'est pas grave grâce au système de redondance (expliqué plus bas)
 - **Reliable (TCP)** — pour les **checksums et l'état du jeu**, qui doivent absolument arriver à destination
 
@@ -34,7 +34,7 @@ Le **rollback** est une technique de netcode qui permet de jouer en ligne **sans
 2. Quand les vrais inputs arrivent du réseau, si la prédiction était **correcte**, tout continue normalement
 3. Si la prédiction était **fausse**, le jeu **revient en arrière** (rollback) jusqu'au dernier état confirmé et **re-simule** toutes les frames avec les bons inputs
 
-Pour implémenter ça, j'utilise **deux modèles** qui tournent en parallèle :
+Pour implémenter ça, on utilise **deux modèles** qui tournent en parallèle :
 - **confirm_model** — le modèle autoritaire qui ne contient que des frames confirmées (les deux joueurs ont envoyé leurs inputs)
 - **current_model** — le modèle spéculatif qui est en avance et affiche le jeu au joueur
 
@@ -64,15 +64,15 @@ Les floats sont utilisés **uniquement pour le rendu** — jamais dans la logiqu
 
 ### Le Problème
 
-Même avec du point fixe, des **désynchronisations** (desyncs) peuvent arriver — par exemple si l'ordre d'itération des collisions diffère entre les deux machines, ou si un état n'est pas correctement rollbacké. Le problème, c'est que quand un desync arrive, **il est très difficile de savoir d'où il vient** si on n'a pas les bons outils.
+Même avec du point fixe, des **désynchronisations** (desyncs) peuvent arriver — par exemple si l'ordre d'itération des collisions diffère entre les deux machines, ou si un état n'est pas correctement rollbacké. Le problème, c'est que quand un desync arrive, **il est très difficile de savoir d'où il vient** sans les bons outils.
 
 ### La Solution : Checksums et Sub-Checksums
 
-J'ai mis en place un système de **checksum** basé sur **Adler-32** qui vérifie que l'état du jeu est identique entre les deux joueurs.
+Le projet met en place un système de **checksum** basé sur **Adler-32** qui vérifie que l'état du jeu est identique entre les deux joueurs.
 
 Le joueur **master** (joueur 1) envoie son checksum toutes les 10 frames confirmées. Le joueur **client** (joueur 2) compare avec son propre checksum. Si ça ne match pas — c'est un desync.
 
-Mais le plus utile, c'est le système de **sub-checksums**. Au lieu de hasher tout l'état en un seul bloc, je le divise en **7 catégories** :
+Mais le plus utile, c'est le système de **sub-checksums**. Au lieu de hasher tout l'état en un seul bloc, il est divisé en **7 catégories** :
 
 | Index | Catégorie | Ce qu'elle contient |
 |-------|-----------|---------------------|
@@ -102,39 +102,39 @@ En plus de la détection, le master envoie aussi **l'état complet du jeu** (30 
 
 ---
 
-## 3. Les Problèmes Rencontrés et Comment Je Les Ai Résolus
+## 3. Les Problèmes Typiquement Rencontrés et Leurs Solutions
 
 ### Problème 1 : Desyncs causés par les floats
 
-**Symptôme :** Les checksums divergeaient après quelques secondes de jeu, même quand les deux joueurs faisaient les mêmes actions.
+**Symptôme :** Les checksums divergent après quelques secondes de jeu, même quand les deux joueurs font les mêmes actions.
 
-**Cause :** Les calculs de physique utilisaient des `float`, et les deux machines produisaient des résultats légèrement différents (différences d'arrondi CPU).
+**Cause :** Les calculs de physique utilisent des `float`, et les deux machines produisent des résultats légèrement différents (différences d'arrondi CPU).
 
-**Solution :** J'ai implémenté une classe `Fixed` en **point fixe 16.16** et converti toute la simulation (positions, vélocités, momentum, friction, accélération) en arithmétique entière. La conversion de float à fixed-point utilise une décomposition directe des bits IEEE 754 pour éviter toute dépendance au mode d'arrondi du CPU.
+**Solution :** Implémenter une classe `Fixed` en **point fixe 16.16** et convertir toute la simulation (positions, vélocités, momentum, friction, accélération) en arithmétique entière. La conversion de float à fixed-point doit utiliser une décomposition directe des bits IEEE 754 pour éviter toute dépendance au mode d'arrondi du CPU.
 
 ### Problème 2 : Impossible de trouver la source des desyncs
 
-**Symptôme :** Le checksum global ne matchait pas, mais je n'avais aucun moyen de savoir **quelle partie** de l'état était différente.
+**Symptôme :** Le checksum global ne match pas, mais aucun moyen de savoir **quelle partie** de l'état est différente.
 
 **Cause :** Un seul checksum sur tout l'état = aucune granularité pour le debug.
 
-**Solution :** J'ai divisé l'état en **7 sub-checksums** (positions, vélocités, inputs, etc.). Quand un desync est détecté, le client envoie ses sub-checksums au master qui les compare un par un et affiche exactement quelles catégories divergent. Ça m'a permis de trouver les bugs en **minutes au lieu d'heures**.
+**Solution :** Diviser l'état en **7 sub-checksums** (positions, vélocités, inputs, etc.). Quand un desync est détecté, le client envoie ses sub-checksums au master qui les compare un par un et affiche exactement quelles catégories divergent. Cette approche permet de trouver les bugs en **minutes au lieu d'heures**.
 
 ### Problème 3 : Ordre non-déterministe des collisions
 
-**Symptôme :** Desyncs intermittents qui ne se reproduisaient pas toujours.
+**Symptôme :** Desyncs intermittents qui ne se reproduisent pas toujours.
 
-**Cause :** Les paires de collision retournées par le QuadTree n'étaient pas toujours dans le même ordre sur les deux machines.
+**Cause :** Les paires de collision retournées par le QuadTree ne sont pas toujours dans le même ordre sur les deux machines.
 
-**Solution :** Ajout d'un `std::sort()` sur les paires de collision **avant** de déclencher les callbacks. Les deux machines traitent donc les collisions dans un ordre identique, peu importe l'ordre interne du QuadTree.
+**Solution :** Ajouter un `std::sort()` sur les paires de collision **avant** de déclencher les callbacks. Les deux machines traitent donc les collisions dans un ordre identique, peu importe l'ordre interne du QuadTree.
 
 ### Problème 4 : Perte de paquets réseau
 
-**Symptôme :** Des rollbacks excessifs et des corrections visibles quand la connexion était instable.
+**Symptôme :** Des rollbacks excessifs et des corrections visibles quand la connexion est instable.
 
 **Cause :** Un seul paquet perdu = un input manquant = prédiction forcée.
 
-**Solution :** Chaque tick, j'envoie une **fenêtre de redondance de 16 frames** d'historique d'inputs (sous forme de keymask 4 bits). Si un paquet est perdu, le prochain paquet contient tout l'historique nécessaire pour rattraper le retard. La reconstruction des inputs est **déterministe** — les keymasks sont convertis en vecteurs de direction avec des constantes exactes (`0.70710678118654752440` pour les diagonales).
+**Solution :** Chaque tick, envoyer une **fenêtre de redondance de 16 frames** d'historique d'inputs (sous forme de keymask 4 bits). Si un paquet est perdu, le prochain paquet contient tout l'historique nécessaire pour rattraper le retard. La reconstruction des inputs doit être **déterministe** — les keymasks sont convertis en vecteurs de direction avec des constantes exactes (`0.70710678118654752440` pour les diagonales).
 
 ```
  Joueur 1 (Master)                              Joueur 2 (Client)
@@ -192,41 +192,41 @@ En plus de la détection, le master envoie aussi **l'état complet du jeu** (30 
 
 ### Conseils Techniques
 
-**1. Commencez par le déterminisme — pas par le réseau.**
-Avant même de toucher à Photon ou au rollback, assurez-vous que votre simulation est **100% déterministe**. Si deux instances du jeu reçoivent les mêmes inputs, elles doivent produire le **même état, bit pour bit**. Testez ça en local d'abord. Si ce n'est pas déterministe, le rollback ne marchera jamais.
+**1. Commencer par le déterminisme — pas par le réseau.**
+Avant même de toucher à Photon ou au rollback, il faut s'assurer que la simulation est **100% déterministe**. Si deux instances du jeu reçoivent les mêmes inputs, elles doivent produire le **même état, bit pour bit**. Tester ça en local d'abord. Si ce n'est pas déterministe, le rollback ne marchera jamais.
 
-**2. N'utilisez PAS de floats dans votre simulation.**
-Les floats ne sont pas déterministes entre différentes machines (et parfois même entre différents compilateurs). Utilisez du **point fixe** ou des **entiers** pour tout ce qui touche à la logique de jeu. Les floats c'est uniquement pour le rendu.
+**2. NE PAS utiliser de floats dans la simulation.**
+Les floats ne sont pas déterministes entre différentes machines (et parfois même entre différents compilateurs). Utiliser du **point fixe** ou des **entiers** pour tout ce qui touche à la logique de jeu. Les floats c'est uniquement pour le rendu.
 
-**3. Mettez en place des sub-checksums dès le début.**
-Ne vous contentez pas d'un seul checksum global. Divisez votre état en catégories et hashez-les séparément. Quand un desync arrive (et il va arriver), vous allez vouloir savoir **exactement** quelle partie de l'état diverge. Sans ça, vous allez chercher pendant des heures.
+**3. Mettre en place des sub-checksums dès le début.**
+Ne pas se contenter d'un seul checksum global. Diviser l'état en catégories et les hasher séparément. Quand un desync arrive (et il va arriver), il faut savoir **exactement** quelle partie de l'état diverge. Sans ça, le debug peut prendre des heures.
 
-**4. Triez vos collisions.**
-Si vous utilisez un QuadTree ou n'importe quel spatial partitioning, l'ordre des paires de collision peut varier. Triez-les avant de les traiter. C'est une ligne de code qui peut vous sauver des jours de debug.
+**4. Trier les collisions.**
+Avec un QuadTree ou n'importe quel spatial partitioning, l'ordre des paires de collision peut varier. Il faut les trier avant de les traiter. C'est une ligne de code qui peut sauver des jours de debug.
 
-**5. Envoyez plus d'inputs que nécessaire.**
-Ne vous fiez pas à un seul paquet par frame. Envoyez une fenêtre de redondance avec l'historique des dernières frames. Si un paquet est perdu, le prochain contient tout ce qu'il faut pour rattraper.
+**5. Envoyer plus d'inputs que nécessaire.**
+Ne pas se fier à un seul paquet par frame. Envoyer une fenêtre de redondance avec l'historique des dernières frames. Si un paquet est perdu, le prochain contient tout ce qu'il faut pour rattraper.
 
 ### Conseils de Gestion de Projet
 
-**1. Testez le réseau le plus tôt possible.**
-Ne développez pas tout votre gameplay en local pour ensuite "ajouter le réseau". Les problèmes de réseau sont fondamentalement différents des problèmes locaux. Avoir une connexion basique entre deux machines dès le début vous permet de détecter les problèmes de déterminisme avant qu'ils ne s'accumulent.
+**1. Tester le réseau le plus tôt possible.**
+Il ne faut pas développer tout le gameplay en local pour ensuite "ajouter le réseau". Les problèmes de réseau sont fondamentalement différents des problèmes locaux. Avoir une connexion basique entre deux machines dès le début permet de détecter les problèmes de déterminisme avant qu'ils ne s'accumulent.
 
-**2. Gardez votre simulation simple.**
-Plus votre simulation est complexe, plus il y a de chances d'introduire du non-déterminisme. Commencez avec le minimum (mouvement + collision) et ajoutez des features une par une, en vérifiant le déterminisme à chaque étape.
+**2. Garder la simulation simple.**
+Plus la simulation est complexe, plus il y a de chances d'introduire du non-déterminisme. Commencer avec le minimum (mouvement + collision) et ajouter des features une par une, en vérifiant le déterminisme à chaque étape.
 
-**3. Logguez tout.**
-Quand un desync arrive, vous avez besoin de savoir **exactement** ce qui s'est passé, frame par frame. Mettez en place un système de logs détaillé dès le début — ça va vous sauver énormément de temps.
+**3. Logger tout.**
+Quand un desync arrive, il faut savoir **exactement** ce qui s'est passé, frame par frame. Mettre en place un système de logs détaillé dès le début — ça sauve énormément de temps.
 
-**4. Ne sous-estimez pas le temps de debug réseau.**
-Débugger des problèmes de réseau prend beaucoup plus de temps que débugger du code local. Les bugs sont **intermittents**, **difficiles à reproduire**, et nécessitent souvent de coordonner deux instances du jeu. Planifiez votre temps en conséquence.
+**4. Ne pas sous-estimer le temps de debug réseau.**
+Débugger des problèmes de réseau prend beaucoup plus de temps que débugger du code local. Les bugs sont **intermittents**, **difficiles à reproduire**, et nécessitent souvent de coordonner deux instances du jeu. Le temps doit être planifié en conséquence.
 
 ---
 
 ## Conclusion
 
-Ce projet m'a appris qu'un bon netcode, c'est **beaucoup plus** que juste envoyer des données d'un point A à un point B. C'est un système complet qui demande du **déterminisme absolu**, des **outils de debug solides**, et une architecture qui sépare clairement la simulation de la présentation.
+Un bon netcode, c'est **beaucoup plus** que juste envoyer des données d'un point A à un point B. C'est un système complet qui demande du **déterminisme absolu**, des **outils de debug solides**, et une architecture qui sépare clairement la simulation de la présentation.
 
-Le rollback netcode est une technique puissante, mais elle repose sur une fondation fragile : si votre simulation n'est pas déterministe, **rien ne fonctionne**. Le point fixe, les sub-checksums et la redondance d'inputs sont les trois piliers qui m'ont permis de livrer un jeu en ligne fonctionnel.
+Le rollback netcode est une technique puissante, mais elle repose sur une fondation fragile : si la simulation n'est pas déterministe, **rien ne fonctionne**. Le point fixe, les sub-checksums et la redondance d'inputs sont les trois piliers qui permettent de livrer un jeu en ligne fonctionnel.
 
 <img src="/image/Sumo_Game_online.png" alt="Sumo Game — Mode en ligne" width="800">
