@@ -3,7 +3,7 @@ layout: post
 title:  "Metroid Vania"
 date:   2026-02-14 14:00:00 +0200
 categories: Blog_Post Metroid_Vania
-hidden : false
+hidden : true
 ---
 
 ## Introduction à Mon Projet : Metroid Vania
