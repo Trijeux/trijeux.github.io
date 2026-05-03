@@ -8,9 +8,9 @@ hidden : false
 
 ## Introduction
 
-**Aujourd'hui, je vous présente mon prochain projet personnel : Egg Ranch, un mini Slime Rancher fait sous Unreal Engine 5.** L'idée part d'un thème simple — *"la vie à la ferme"* — et je me donne **environ un mois** (cible : 25 mai 2026) pour livrer au moins une **alpha ou une beta jouable**, histoire que les gens puissent y jouer et me donner du feedback.
+**Aujourd'hui, je vous présente mon prochain projet personnel : Egg Ranch, un mini Slime Rancher fait sous Unreal Engine 5.** L'idée part d'un thème simple — *"la vie à la ferme"* — et je me donne **9 semaines** (du **4 mai au 5 juillet 2026**, avec une cible interne au **2 juillet** pour garder 3 jours de marge) pour livrer au moins une **alpha ou une beta jouable**, histoire que les gens puissent y jouer et me donner du feedback.
 
-Ce n'est pas une vraie game jam : c'est un **projet personnel** avec une deadline que je m'impose moi-même pour rester motivé et éviter le scope creep. C'est aussi pour moi l'occasion de me lancer sérieusement sur **Unreal Engine 5**, un moteur que j'ai très peu touché jusqu'à maintenant. Je veux profiter de ce projet pour apprendre les bases tout en livrant quelque chose de présentable.
+Ce n'est pas une vraie game jam : c'est un **projet personnel** avec une deadline que je m'impose moi-même pour rester motivé et éviter le scope creep. C'est aussi pour moi l'occasion de me lancer sérieusement sur **Unreal Engine 5**, un moteur que j'ai très peu touché jusqu'à maintenant. Particularité importante : je démarre **from scratch sur un projet vide (template Blank)**, sans utiliser le template First Person d'Epic. C'est plus long au démarrage, mais beaucoup plus formateur — et 9 semaines me laissent largement le temps de bien faire les choses.
 
 <img src="/image/Egg_Ranch_Concept.png" alt="Egg Ranch — Concept art" width="800">
 
@@ -70,53 +70,95 @@ Pour garantir que j'aurai un jeu fini à la fin, j'ai défini un MVP avec le str
 - Cycle jour / nuit
 - Petits événements (poule géante rare, météo)
 - Système d'**hybridation** (poule dorée + arc-en-ciel = nouvelle poule)
+- Système de **sauvegarde / chargement**
 
 ---
 
-## 3. Mon Planning sur 4 Semaines
+## 3. Pourquoi *from scratch* ?
 
-Je me donne environ un mois pour sortir une **alpha/beta jouable**. J'ai découpé le projet en 4 semaines avec des objectifs clairs par semaine. La règle d'or : **ne jamais prendre de retard sur la fin de la semaine 2**. Si les poules pondent des œufs à la fin de la semaine 2, le reste suit.
+Plutôt que de partir du template First Person d'Epic, je crée le projet à partir d'un projet vide. Partir d'un template tout fait est rapide au début, mais quand on veut modifier quelque chose, on se retrouve à essayer de comprendre du code qu'on n'a pas écrit. Partir de zéro prend une semaine de plus, mais permet de **tout comprendre et tout pouvoir modifier en confiance**. Sur un projet de 9 semaines, c'est largement rentabilisé.
+
+Concrètement, ça implique :
+
+- **Semaine 1 entièrement dédiée** à l'apprentissage Unreal et à la création du contrôleur FPS depuis zéro
+- Chaque grosse feature **découpée en deux semaines** (apprentissage puis implémentation propre)
+- Plus de buffer pour reprendre, refactoriser et comprendre en profondeur
+- Plus de temps pour le polish final (game feel, sons, particules)
+
+---
+
+## 4. Mon Planning sur 9 Semaines
+
+Je me donne 9 semaines pour sortir une **alpha/beta jouable**. La cible interne est le **2 juillet** pour garder 3 jours de marge avant la deadline du **5 juillet**. Le buffer sauve toujours.
+
+La règle d'or : **ne jamais prendre de retard sur la fin de la semaine 5**. Si à ce moment-là j'ai plusieurs poules dans un enclos qui mangent et pondent, le cœur du jeu est là et le reste suit.
 
 | Semaine | Dates | Objectif | Livrable |
 |---------|-------|----------|----------|
-| **S1** | 29 avr → 5 mai | Fondations + mouvement | Aspirateur fonctionnel sur cubes |
-| **S2** | 6 mai → 12 mai | Poules + écosystème | Poules pondent des œufs |
-| **S3** | 13 mai → 19 mai | Économie + progression | Boucle complète jouable |
-| **S4** | 20 mai → 25 mai | Polish + assets + game feel | Alpha/Beta jouable (build .exe) |
+| **S1** | 4 → 10 mai | Apprentissage UE + projet from scratch + contrôleur FPS basique | Je marche, je tourne, je saute dans une scène vide |
+| **S2** | 11 → 17 mai | L'aspirateur (raycast + attraction) | Les cubes volent vers moi quand je vise |
+| **S3** | 18 → 24 mai | Stockage + relâchement + UI inventaire | Boucle aspirer / stocker / relâcher complète |
+| **S4** | 25 → 31 mai | Les poules : Blueprint + IA basique + ponte d'œufs | Une poule erre, mange et pond |
+| **S5** | 1 → 7 juin | L'écosystème : grain, types de poules, enclos | 3 types de poules dans un enclos qui pondent |
+| **S6** | 8 → 14 juin | Économie : marchand + UI pièces + améliorations | Je vends des œufs et j'achète des upgrades |
+| **S7** | 15 → 21 juin | Zone d'exploration + capture poules sauvages | Boucle complète du jeu jouable |
+| **S8** | 22 → 28 juin | Polish : assets, sons, particules, game feel | Le jeu a une vraie identité visuelle |
+| **S9** | 29 juin → 2 juillet | Build + tests + corrections + finalisation | Un .exe jouable de bout en bout |
 
-### Semaine 1 — Fondations + Mouvement
+### Semaine 1 — Apprentissage et fondations
 
-**Objectif :** Avoir un personnage FPS qui se balade dans une scène basique, avec l'outil aspirateur fonctionnel sur des cubes.
+**Objectif :** Apprendre les bases d'Unreal Engine 5, créer un projet from scratch, et avoir un personnage FPS qui se balade librement dans une scène vide avec ZQSD, souris et saut.
 
-L'idée est de **valider la mécanique principale du jeu** (l'aspirateur) avant de penser aux poules ou au level design. Si je peux aspirer un cube, le stocker, et le relâcher ailleurs, alors j'ai déjà 60% du gameplay technique.
+C'est volontairement plus calme côté production, mais plus dense côté apprentissage. Au programme : créer mon `BP_PlayerCharacter`, configurer **Enhanced Input** (Input Action + Mapping Context), créer un Game Mode propre, et mettre tout ça sur Git/GitHub dès le début.
 
-**Piège à éviter :** ne pas commencer à modéliser des poules ou chercher des assets. Cette semaine = mécanique pure avec des cubes colorés.
+**Piège à éviter :** ne pas commencer l'aspirateur cette semaine. Si je suis tenté, c'est que je veux brûler les étapes. Un contrôleur fait main mais bien compris vaut 10 fois mieux qu'un template qu'on bricole sans comprendre.
 
-### Semaine 2 — Les Poules + l'Écosystème
+### Semaines 2 & 3 — L'aspirateur
 
-**Objectif :** Avoir 2-3 types de poules qui se baladent, mangent du grain, et pondent des œufs.
+**Objectif :** Construire la mécanique principale du jeu en deux temps.
 
-C'est **la semaine la plus critique** — si elle réussit, le cœur du jeu est là. Je vais créer un Blueprint Poule avec un mouvement aléatoire (AI Move To random points), des états basiques (errer, manger, pondre), et une variable de faim qui descend avec le temps.
+- **S2** — Line Trace depuis la caméra et attraction par physique sur des cubes marqués `Suckable`. À la fin de la semaine, je peux viser un cube et le faire venir vers moi de façon satisfaisante.
+- **S3** — Stockage dans un inventaire, relâchement avec `Spawn Actor From Class`, et premier widget HUD avec un compteur. La boucle aspirer → stocker → relâcher est complète.
 
-**Piège à éviter :** ne pas se lancer dans une IA complexe. Une poule qui erre aléatoirement et réagit au grain proche, c'est largement suffisant. Slime Rancher lui-même a une IA très simple.
+### Semaine 4 — Les poules
 
-### Semaine 3 — Économie + Progression + Zone d'Exploration
+**Objectif :** Créer le `BP_Chicken` avec une IA basique : errer, manger, pondre.
 
-**Objectif :** Avoir la boucle complète : explorer, capturer, ramener, vendre, améliorer.
+Mouvement aléatoire (`AI Move To` sur des `Random Reachable Point In Radius`), variable de faim, états gérés par une simple Enum (`Wandering`, `Eating`, `Laying`), et système de ponte qui spawn un `BP_Egg` aspirable. **Slime Rancher lui-même a une IA très simple** — pas la peine de partir dans une Behavior Tree complexe.
 
-C'est la semaine la plus chargée. Si je sens que je prends du retard, je coupe les améliorations à 2 au lieu de 4, et je garde une seule poule sauvage différente dans la zone d'exploration. **Le but est d'avoir la boucle complète, pas la richesse de contenu.**
+### Semaine 5 — L'écosystème *(la semaine critique)*
 
-### Semaine 4 — Polish + Assets + Game Feel
+**Objectif :** Avoir 3 types de poules dans un enclos qui mangent du grain et pondent leurs œufs respectifs.
 
-**Objectif :** Transformer mon prototype fonctionnel en jeu présentable.
+C'est la semaine où le cœur du jeu doit être bouclé. Si à la fin de S5 je peux jeter du grain à 3 poules dans un enclos et récolter leurs œufs avec mon aspirateur, le reste du planning est jouable. C'est la cible à ne pas rater.
 
-C'est ici que je remplace les cubes par des vraies poules low-poly, que j'ajoute les sons, les particules, le camera shake, et toute la couche de **game feel** qui fait passer un prototype à un vrai jeu. Je termine avec un build `.exe` Windows que **les gens peuvent télécharger et tester** — c'est le but de l'alpha/beta : avoir du vrai feedback de joueurs.
+### Semaine 6 — Économie et progression
 
-**Buffer après le 25 mai :** correction des bugs remontés par les premiers testeurs, derniers ajustements, capture vidéo pour partager le projet.
+**Objectif :** Marchand, UI de pièces, et 3-4 améliorations achetables.
+
+Vente des œufs absorbés (conversion en pièces selon le type), HUD avec le compteur, panneau d'upgrade, et implémentation des effets : capacité aspirateur, vitesse de course, taille du sac de grain, accès zone 2.
+
+### Semaine 7 — Zone d'exploration
+
+**Objectif :** Boucle complète : ferme avec 0 poule → exploration → capture → ramener → enclos → nourrir → récolter → vendre → améliorer.
+
+Création de la zone sauvage, spawner de poules sauvages, comportement de fuite, et apprivoisement quand on les relâche dans un enclos. Si je sens que je prends du retard, je coupe les améliorations à 2 et je garde une seule poule sauvage. **Le but est d'avoir la boucle complète, pas la richesse de contenu.**
+
+### Semaine 8 — Polish et game feel
+
+**Objectif :** Transformer le prototype fonctionnel en jeu agréable à voir et à jouer.
+
+Remplacement des cubes par des modèles low-poly (Blender ou Sketchfab), pack de ferme stylisé du Marketplace, foliage avec Megascans, sons (aspiration, ponte, pièce, ambiance), particules, camera shake léger, feedback UI (pop-up `+5 pièces`), éclairage Lumen propre (Sky Atmosphere + Directional Light + Sky Light), et un menu principal minimal.
+
+### Semaine 9 — Build et finalisation
+
+**Objectif :** Compiler le `.exe` Windows, tester en conditions réelles, faire tester par 1-2 amis, prioriser les bugs et corriger.
+
+Je termine avec un build téléchargeable que les gens peuvent vraiment essayer — c'est le but de l'alpha/beta : avoir du vrai feedback de joueurs. **Buffer 3-5 juillet** pour les imprévus, derniers ajustements, ou simplement souffler avant la deadline.
 
 ---
 
-## 4. Stack Technique
+## 5. Stack Technique
 
 ### Logiciels
 
@@ -128,7 +170,7 @@ C'est ici que je remplace les cubes par des vraies poules low-poly, que j'ajoute
 ### Approche Programmation
 
 - **Blueprint à 90%** pour ce projet
-- **C++ uniquement si besoin avéré**, ou en semaine 4 pour la pratique sur un système isolé
+- **C++ uniquement si besoin avéré**, ou éventuellement en S8 pour pratiquer sur un système isolé
 
 Pour un débutant Unreal comme moi, mélanger Blueprint et C++ trop tôt double la difficulté. Je préfère me concentrer sur livrer un jeu fini.
 
@@ -142,7 +184,7 @@ Pour un débutant Unreal comme moi, mélanger Blueprint et C++ trop tôt double 
 
 ---
 
-## 5. Mes Règles d'Or pour ce Projet
+## 6. Mes Règles d'Or pour ce Projet
 
 Je connais mes propres pièges, alors je me suis fixé quelques règles strictes :
 
@@ -153,18 +195,21 @@ J'apprends 1-2 concepts, je les applique sur mon projet, je reviens sur YouTube 
 Unreal corrompt parfois des fichiers. C'est gratuit et ça prend 10 minutes à mettre en place — aucune excuse.
 
 **3. Ne pas utiliser C++ tant que Blueprint suffit.**
-Pour Egg Ranch, Blueprint suffit à 100%. La pratique du C++ peut attendre la semaine 4 si j'ai de l'avance.
+Pour Egg Ranch, Blueprint suffit à 100%. La pratique du C++ peut attendre la S8 si j'ai de l'avance.
 
 **4. Règle des 30 minutes sur les assets.**
-Ne jamais dépenser plus de 30 minutes à chercher un asset. Si je ne trouve pas mon bonheur, je fais un cube avec une couleur et je passe à autre chose. J'y reviendrai en semaine 4.
+Ne jamais dépenser plus de 30 minutes à chercher un asset. Si je ne trouve pas mon bonheur, je fais un cube avec une couleur et je passe à autre chose. J'y reviendrai en S8.
 
-**5. Le scope est mon meilleur ami.**
+**5. Pas de retard sur la fin de S5.**
+La priorité absolue : avoir des poules qui pondent dans un enclos avant le 7 juin. Si je dérive, je coupe ailleurs (zone d'exploration, améliorations) plutôt que de toucher à ce jalon.
+
+**6. Le scope est mon meilleur ami.**
 Mieux vaut un petit jeu fini qu'un gros jeu cassé.
 
 ---
 
 ## Conclusion
 
-Egg Ranch, c'est un projet qui me ressemble : **systémique, satisfaisant, et avec un scope maîtrisé**. C'est aussi mon premier vrai projet Unreal Engine 5, et je vois ce mois auto-imposé comme **la meilleure façon d'apprendre** un nouveau moteur — par l'urgence et la nécessité de finir quelque chose de jouable.
+Egg Ranch, c'est un projet qui me ressemble : **systémique, satisfaisant, et avec un scope maîtrisé**. C'est aussi mon premier vrai projet Unreal Engine 5, et le choix du *from scratch* combiné aux 9 semaines me donne l'occasion d'apprendre proprement plutôt que de bricoler.
 
-L'objectif est clair : sortir une **alpha ou beta** d'ici fin mai pour que les gens puissent y jouer et me donner du feedback. Je publierai un nouvel article à ce moment-là pour présenter le résultat, ce que j'ai appris, et ce que je referais différemment. **À suivre !**
+L'objectif est clair : sortir une **alpha ou beta** d'ici **début juillet** pour que les gens puissent y jouer et me donner du feedback. Je publierai un nouvel article à ce moment-là pour présenter le résultat, ce que j'ai appris, et ce que je referais différemment. **À suivre !**
