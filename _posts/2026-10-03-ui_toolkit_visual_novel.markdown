@@ -2,7 +2,7 @@
 layout: post
 title:  "Egg Ranch — Semaine 4 : Mes poules font de la résistance"
 date:   2026-05-25 18:00:00 +0200
-categories: Blog_Post Unreal_Engine Egg_Ranch
+categories: Pres
 hidden : true
 ---
 
