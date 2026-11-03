@@ -14,6 +14,8 @@ Ce n'est pas une vraie game jam : c'est un **projet personnel** avec une deadlin
 
 <img src="/image/Egg_Ranch_Concept.png" alt="Egg Ranch — Concept art" width="800">
 
+*Concept art généré par IA pour illustrer l'ambiance visée : ce n'est pas une capture du jeu.*
+
 ---
 
 ## 1. Le Concept
