@@ -190,9 +190,9 @@ Mieux vaut un petit jeu fini qu'un gros jeu cassé.
 
 Le retour d'expérience semaine par semaine — galères, choix techniques, leçons apprises. Mis à jour au fur et à mesure que les semaines passent.
 
-- **[Semaine 1 — Contrôleur FPS from scratch](/blog_post/unreal_engine/egg_ranch/Egg_Ranch-S1.html)** — 10/05/2026
-- **[Semaines 2 & 3 — L'aspirateur](/blog_post/unreal_engine/egg_ranch/Egg_Ranch-S2-S3.html)** — 13/05/2026
-- **[Semaine 4 — Mes poules font de la résistance](/blog_post/unreal_engine/egg_ranch/Egg_Ranch-S4.html)** — 25/05/2026
+- **[Semaine 1 — Contrôleur FPS from scratch](/blog_post/unreal_engine/egg_ranch/Egg_Ranch-S1.html)**
+- **[Semaines 2 & 3 — L'aspirateur](/blog_post/unreal_engine/egg_ranch/Egg_Ranch-S2-S3.html)**
+- **[Semaine 4 — Mes poules font de la résistance](/blog_post/unreal_engine/egg_ranch/Egg_Ranch-S4.html)**
 
 ---
 
