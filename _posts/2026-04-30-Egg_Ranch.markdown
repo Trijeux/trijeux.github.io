@@ -8,9 +8,9 @@ hidden : false
 
 ## Introduction
 
-**Aujourd'hui, je vous présente mon prochain projet personnel : Egg Ranch, un mini Slime Rancher fait sous Unreal Engine 5.** L'idée part d'un thème simple — *"la vie à la ferme"* — et je me donne **9 semaines** (du **4 mai au 5 juillet 2026**, avec une cible interne au **2 juillet** pour garder 3 jours de marge) pour livrer au moins une **alpha ou une beta jouable**, histoire que les gens puissent y jouer et me donner du feedback.
+**Aujourd'hui, je vous présente mon prochain projet personnel : Egg Ranch, un mini Slime Rancher fait sous Unreal Engine 5.** L'idée part d'un thème simple — *"la vie à la ferme"* — et je me donne **9 jalons** (démarrage le **4 mai 2026**, avec 3 jours de marge en fin de planning) pour livrer au moins une **alpha ou une beta jouable**, histoire que les gens puissent y jouer et me donner du feedback.
 
-Ce n'est pas une vraie game jam : c'est un **projet personnel** avec une deadline que je m'impose moi-même pour rester motivé et éviter le scope creep. C'est aussi pour moi l'occasion de me lancer sérieusement sur **Unreal Engine 5**, un moteur que j'ai très peu touché jusqu'à maintenant. Particularité importante : je démarre **from scratch sur un projet vide (template Blank)**, sans utiliser le template First Person d'Epic. C'est plus long au démarrage, mais beaucoup plus formateur — et 9 semaines me laissent largement le temps de bien faire les choses.
+Ce n'est pas une vraie game jam : c'est un **projet personnel** avec une deadline que je m'impose moi-même pour rester motivé et éviter le scope creep. C'est aussi pour moi l'occasion de me lancer sérieusement sur **Unreal Engine 5**, un moteur que j'ai très peu touché jusqu'à maintenant. Particularité importante : je démarre **from scratch sur un projet vide (template Blank)**, sans utiliser le template First Person d'Epic. C'est plus long au démarrage, mais beaucoup plus formateur — et 9 jalons me laissent largement le temps de bien faire les choses.
 
 <img src="/image/Egg_Ranch_Concept.png" alt="Egg Ranch — Concept art" width="800">
 
@@ -76,71 +76,71 @@ Pour garantir que j'aurai un jeu fini à la fin, j'ai défini un MVP avec le str
 
 ## 3. Pourquoi *from scratch* ?
 
-Plutôt que de partir du template First Person d'Epic, je crée le projet à partir d'un projet vide. Partir d'un template tout fait est rapide au début, mais quand on veut modifier quelque chose, on se retrouve à essayer de comprendre du code qu'on n'a pas écrit. Partir de zéro prend une semaine de plus, mais permet de **tout comprendre et tout pouvoir modifier en confiance**. Sur un projet de 9 semaines, c'est largement rentabilisé.
+Plutôt que de partir du template First Person d'Epic, je crée le projet à partir d'un projet vide. Partir d'un template tout fait est rapide au début, mais quand on veut modifier quelque chose, on se retrouve à essayer de comprendre du code qu'on n'a pas écrit. Partir de zéro prend un jalon de plus, mais permet de **tout comprendre et tout pouvoir modifier en confiance**. Sur un projet de 9 jalons, c'est largement rentabilisé.
 
 Concrètement, ça implique :
 
-- **Semaine 1 entièrement dédiée** à l'apprentissage Unreal et à la création du contrôleur FPS depuis zéro
-- Chaque grosse feature **découpée en deux semaines** (apprentissage puis implémentation propre)
+- **Jalon 1 entièrement dédié** à l'apprentissage Unreal et à la création du contrôleur FPS depuis zéro
+- Chaque grosse feature **découpée en deux jalons** (apprentissage puis implémentation propre)
 - Plus de buffer pour reprendre, refactoriser et comprendre en profondeur
 - Plus de temps pour le polish final (game feel, sons, particules)
 
 ---
 
-## 4. Mon Planning sur 9 Semaines
+## 4. Mon Planning en 9 Jalons
 
-Je me donne 9 semaines pour sortir une **alpha/beta jouable**. La cible interne est le **2 juillet** pour garder 3 jours de marge avant la deadline du **5 juillet**. Le buffer sauve toujours.
+Je me donne 9 jalons pour sortir une **alpha/beta jouable**, avec 3 jours de marge avant la deadline. Le buffer sauve toujours.
 
-La règle d'or : **ne jamais prendre de retard sur la fin de la semaine 5**. Si à ce moment-là j'ai plusieurs poules dans un enclos qui mangent et pondent, le cœur du jeu est là et le reste suit.
+La règle d'or : **ne jamais prendre de retard sur la fin du jalon 5**. Si à ce moment-là j'ai plusieurs poules dans un enclos qui mangent et pondent, le cœur du jeu est là et le reste suit.
 
-> 🟢 **Update fin mai 2026 — 2 à 3 semaines d'avance.** Les semaines **S1 à S4 sont bouclées**. La boucle *aspirer → stocker → relâcher* est fonctionnelle depuis le 13 mai, et la S4 a livré non seulement les poules (IA, ponte, machine à états physique/IA) mais aussi un **système d'inventaire à slots complet** qui n'était même pas au planning. J'attaque la S5 (grain et faim) avec une marge confortable. Cible interne révisée : projet terminé **mi-juin** au lieu du 2 juillet. Les détails techniques semaine par semaine sont dans les [devlogs en bas de page](#devlogs-détaillés).
+> 🟢 **Update fin mai 2026 — 2 à 3 jalons d'avance.** Les jalons **J1 à J4 sont bouclés**. La boucle *aspirer → stocker → relâcher* est fonctionnelle depuis le 13 mai, et le J4 a livré non seulement les poules (IA, ponte, machine à états physique/IA) mais aussi un **système d'inventaire à slots complet** qui n'était même pas au planning. J'attaque le J5 (grain et faim) avec une marge confortable. Cible interne révisée : projet terminé **vers le J7** au lieu du J9. Les détails techniques jalon par jalon sont dans les [devlogs en bas de page](#devlogs-détaillés).
 
 <video src="/image/Egg_Ranch_Teaser_S4.mp4" autoplay loop muted playsinline width="800"></video>
 
 
-| Semaine | Dates | Objectif | Livrable | Statut |
+| Jalon | Dates | Objectif | Livrable | Statut |
 |---------|-------|----------|----------|--------|
-| **S1** | 4 → 10 mai | Apprentissage UE + projet from scratch + contrôleur FPS basique | Je marche, je tourne, je saute dans une scène vide | ✅ **TERMINÉE** |
-| **S2** | 11 → 17 mai *(bouclée le 13)* | L'aspirateur (raycast + attraction) | Les cubes volent vers moi quand je vise | ✅ **TERMINÉE** |
-| **S3** | 18 → 24 mai *(bouclée le 13, en avance)* | Stockage + relâchement + UI inventaire | Boucle aspirer / stocker / relâcher complète | ✅ **TERMINÉE** |
-| **S4** | 25 → 31 mai | Les poules : Blueprint + IA basique + ponte d'œufs + inventaire à slots (bonus) | Poules autonomes qui pondent + système à slots complet | ✅ **TERMINÉE** |
-| **S5** | 1 → 7 juin | L'écosystème : grain, types de poules, enclos | 3 types de poules dans un enclos qui pondent | ⏳ À venir |
-| **S6** | 8 → 14 juin | Économie : marchand + UI pièces + améliorations | Je vends des œufs et j'achète des upgrades | ⏳ À venir |
-| **S7** | 15 → 21 juin | Zone d'exploration + capture poules sauvages | Boucle complète du jeu jouable | ⏳ À venir |
-| **S8** | 22 → 28 juin | Polish : assets, sons, particules, game feel | Le jeu a une vraie identité visuelle | ⏳ À venir |
-| **S9** | 29 juin → 2 juillet | Build + tests + corrections + finalisation | Un .exe jouable de bout en bout | ⏳ À venir |
+| **J1** | 4 → 10 mai | Apprentissage UE + projet from scratch + contrôleur FPS basique | Je marche, je tourne, je saute dans une scène vide | ✅ **TERMINÉ** |
+| **J2** | 11 → 17 mai *(bouclé le 13)* | L'aspirateur (raycast + attraction) | Les cubes volent vers moi quand je vise | ✅ **TERMINÉ** |
+| **J3** | 18 → 24 mai *(bouclé le 13, en avance)* | Stockage + relâchement + UI inventaire | Boucle aspirer / stocker / relâcher complète | ✅ **TERMINÉ** |
+| **J4** | 25 → 31 mai | Les poules : Blueprint + IA basique + ponte d'œufs + inventaire à slots (bonus) | Poules autonomes qui pondent + système à slots complet | ✅ **TERMINÉ** |
+| **J5** | — | L'écosystème : grain, types de poules, enclos | 3 types de poules dans un enclos qui pondent | ⏳ À venir |
+| **J6** | — | Économie : marchand + UI pièces + améliorations | Je vends des œufs et j'achète des upgrades | ⏳ À venir |
+| **J7** | — | Zone d'exploration + capture poules sauvages | Boucle complète du jeu jouable | ⏳ À venir |
+| **J8** | — | Polish : assets, sons, particules, game feel | Le jeu a une vraie identité visuelle | ⏳ À venir |
+| **J9** | — | Build + tests + corrections + finalisation | Un .exe jouable de bout en bout | ⏳ À venir |
 
-Pour les semaines déjà bouclées (S1 à S4), les détails techniques (galères, choix d'implémentation, leçons apprises) sont dans les [devlogs détaillés en bas de page](#devlogs-détaillés). Ce qui suit, c'est le plan pour les semaines à venir.
+Pour les jalons déjà bouclés (J1 à J4), les détails techniques (galères, choix d'implémentation, leçons apprises) sont dans les [devlogs détaillés en bas de page](#devlogs-détaillés). Ce qui suit, c'est le plan pour les jalons à venir.
 
-### Semaine 5 — L'écosystème *(la semaine critique)*
+### Jalon 5 — L'écosystème *(le jalon critique)*
 
 **Objectif :** Avoir 3 types de poules dans un enclos qui mangent du grain et pondent leurs œufs respectifs.
 
-C'est la semaine où le cœur du jeu doit être bouclé. Si à la fin de S5 je peux jeter du grain à 3 poules dans un enclos et récolter leurs œufs avec mon aspirateur, le reste du planning est jouable. C'est la cible à ne pas rater.
+C'est le jalon où le cœur du jeu doit être bouclé. Si à la fin du J5 je peux jeter du grain à 3 poules dans un enclos et récolter leurs œufs avec mon aspirateur, le reste du planning est jouable. C'est la cible à ne pas rater.
 
-### Semaine 6 — Économie et progression
+### Jalon 6 — Économie et progression
 
 **Objectif :** Marchand, UI de pièces, et 3-4 améliorations achetables.
 
 Vente des œufs absorbés (conversion en pièces selon le type), HUD avec le compteur, panneau d'upgrade, et implémentation des effets : capacité aspirateur, vitesse de course, taille du sac de grain, accès zone 2.
 
-### Semaine 7 — Zone d'exploration
+### Jalon 7 — Zone d'exploration
 
 **Objectif :** Boucle complète : ferme avec 0 poule → exploration → capture → ramener → enclos → nourrir → récolter → vendre → améliorer.
 
 Création de la zone sauvage, spawner de poules sauvages, comportement de fuite, et apprivoisement quand on les relâche dans un enclos. Si je sens que je prends du retard, je coupe les améliorations à 2 et je garde une seule poule sauvage. **Le but est d'avoir la boucle complète, pas la richesse de contenu.**
 
-### Semaine 8 — Polish et game feel
+### Jalon 8 — Polish et game feel
 
 **Objectif :** Transformer le prototype fonctionnel en jeu agréable à voir et à jouer.
 
 Remplacement des cubes par des modèles low-poly (Blender ou Sketchfab), pack de ferme stylisé du Marketplace, foliage avec Megascans, sons (aspiration, ponte, pièce, ambiance), particules, camera shake léger, feedback UI (pop-up `+5 pièces`), éclairage Lumen propre (Sky Atmosphere + Directional Light + Sky Light), et un menu principal minimal.
 
-### Semaine 9 — Build et finalisation
+### Jalon 9 — Build et finalisation
 
 **Objectif :** Compiler le `.exe` Windows, tester en conditions réelles, faire tester par 1-2 amis, prioriser les bugs et corriger.
 
-Je termine avec un build téléchargeable que les gens peuvent vraiment essayer — c'est le but de l'alpha/beta : avoir du vrai feedback de joueurs. **Buffer 3-5 juillet** pour les imprévus, derniers ajustements, ou simplement souffler avant la deadline.
+Je termine avec un build téléchargeable que les gens peuvent vraiment essayer — c'est le but de l'alpha/beta : avoir du vrai feedback de joueurs. **3 jours de buffer** pour les imprévus, derniers ajustements, ou simplement souffler avant la deadline.
 
 ---
 
@@ -156,7 +156,7 @@ Je termine avec un build téléchargeable que les gens peuvent vraiment essayer 
 ### Approche Programmation
 
 - **Blueprint à 90%** pour ce projet
-- **C++ uniquement si besoin avéré**, ou éventuellement en S8 pour pratiquer sur un système isolé
+- **C++ uniquement si besoin avéré**, ou éventuellement au J8 pour pratiquer sur un système isolé
 
 Pour un débutant Unreal comme moi, mélanger Blueprint et C++ trop tôt double la difficulté. Je préfère me concentrer sur livrer un jeu fini.
 
@@ -173,13 +173,13 @@ J'apprends 1-2 concepts, je les applique sur mon projet, je reviens sur YouTube 
 Unreal corrompt parfois des fichiers. C'est gratuit et ça prend 10 minutes à mettre en place — aucune excuse.
 
 **3. Ne pas utiliser C++ tant que Blueprint suffit.**
-Pour Egg Ranch, Blueprint suffit à 100%. La pratique du C++ peut attendre la S8 si j'ai de l'avance.
+Pour Egg Ranch, Blueprint suffit à 100%. La pratique du C++ peut attendre le J8 si j'ai de l'avance.
 
 **4. Règle des 30 minutes sur les assets.**
-Ne jamais dépenser plus de 30 minutes à chercher un asset. Si je ne trouve pas mon bonheur, je fais un cube avec une couleur et je passe à autre chose. J'y reviendrai en S8.
+Ne jamais dépenser plus de 30 minutes à chercher un asset. Si je ne trouve pas mon bonheur, je fais un cube avec une couleur et je passe à autre chose. J'y reviendrai au J8.
 
-**5. Pas de retard sur la fin de S5.**
-La priorité absolue : avoir des poules qui pondent dans un enclos avant le 7 juin. Si je dérive, je coupe ailleurs (zone d'exploration, améliorations) plutôt que de toucher à ce jalon.
+**5. Pas de retard sur la fin du J5.**
+La priorité absolue : avoir des poules qui pondent dans un enclos avant la fin du J5. Si je dérive, je coupe ailleurs (zone d'exploration, améliorations) plutôt que de toucher à ce jalon.
 
 **6. Le scope est mon meilleur ami.**
 Mieux vaut un petit jeu fini qu'un gros jeu cassé.
@@ -188,16 +188,16 @@ Mieux vaut un petit jeu fini qu'un gros jeu cassé.
 
 ## Devlogs détaillés
 
-Le retour d'expérience semaine par semaine — galères, choix techniques, leçons apprises. Mis à jour au fur et à mesure que les semaines passent.
+Le retour d'expérience jalon par jalon — galères, choix techniques, leçons apprises. Mis à jour au fur et à mesure que les jalons avancent.
 
-- **[Semaine 1 — Contrôleur FPS from scratch](/blog_post/unreal_engine/egg_ranch/Egg_Ranch-S1.html)**
-- **[Semaines 2 & 3 — L'aspirateur](/blog_post/unreal_engine/egg_ranch/Egg_Ranch-S2-S3.html)**
-- **[Semaine 4 — Mes poules font de la résistance](/blog_post/unreal_engine/egg_ranch/Egg_Ranch-S4.html)**
+- **[Jalon 1 — Contrôleur FPS from scratch](/blog_post/unreal_engine/egg_ranch/Egg_Ranch-S1.html)**
+- **[Jalons 2 & 3 — L'aspirateur](/blog_post/unreal_engine/egg_ranch/Egg_Ranch-S2-S3.html)**
+- **[Jalon 4 — Mes poules font de la résistance](/blog_post/unreal_engine/egg_ranch/Egg_Ranch-S4.html)**
 
 ---
 
 ## Conclusion
 
-Egg Ranch, c'est un projet qui me ressemble : **systémique, satisfaisant, et avec un scope maîtrisé**. C'est aussi mon premier vrai projet Unreal Engine 5, et le choix du *from scratch* combiné aux 9 semaines me donne l'occasion d'apprendre proprement plutôt que de bricoler.
+Egg Ranch, c'est un projet qui me ressemble : **systémique, satisfaisant, et avec un scope maîtrisé**. C'est aussi mon premier vrai projet Unreal Engine 5, et le choix du *from scratch* combiné aux 9 jalons me donne l'occasion d'apprendre proprement plutôt que de bricoler.
 
-L'objectif est clair : sortir une **alpha ou beta** d'ici **début juillet** pour que les gens puissent y jouer et me donner du feedback. Je publierai un nouvel article à ce moment-là pour présenter le résultat, ce que j'ai appris, et ce que je referais différemment. **À suivre !**
+L'objectif est clair : sortir une **alpha ou beta** à la fin du **J9** pour que les gens puissent y jouer et me donner du feedback. Je publierai un nouvel article à ce moment-là pour présenter le résultat, ce que j'ai appris, et ce que je referais différemment. **À suivre !**

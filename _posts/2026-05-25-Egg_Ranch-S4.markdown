@@ -1,14 +1,14 @@
 ---
 layout: post
-title:  "Egg Ranch — Semaine 4 : Mes poules font de la résistance"
+title:  "Egg Ranch — Jalon 4 : Mes poules font de la résistance"
 date:   2026-05-25 18:00:00 +0200
 categories: Blog_Post Unreal_Engine Egg_Ranch
 hidden : true
 ---
 
-Mise à jour sur la **Semaine 4**, celle des poules. Sur le papier : "une boule qui se balade et qui pond des œufs". Dans la pratique, c'est de loin la semaine la plus dense techniquement depuis le début — deux gros chantiers parallèles : faire vivre les poules d'un côté, et **refaire complètement l'inventaire en système à slots type Slime Rancher** de l'autre. Ce dernier n'était même pas au planning, mais il est devenu évident qu'il était indispensable pour la suite.
+Mise à jour sur le **Jalon 4**, celui des poules. Sur le papier : "une boule qui se balade et qui pond des œufs". Dans la pratique, c'est de loin le jalon le plus dense techniquement depuis le début — deux gros chantiers parallèles : faire vivre les poules d'un côté, et **refaire complètement l'inventaire en système à slots type Slime Rancher** de l'autre. Ce dernier n'était même pas au planning, mais il est devenu évident qu'il était indispensable pour la suite.
 
-J'ai aussi eu une excellente leçon sur les différences entre **Pawn** et **Character**, sur le fonctionnement des **Custom Events** et des nodes Latent, et sur le fait que les **Structures Blueprint** sont copiées par valeur. Beaucoup de "ah ouais d'accord" cette semaine.
+J'ai aussi eu une excellente leçon sur les différences entre **Pawn** et **Character**, sur le fonctionnement des **Custom Events** et des nodes Latent, et sur le fait que les **Structures Blueprint** sont copiées par valeur. Beaucoup de "ah ouais d'accord" ce jalon.
 
 ---
 
@@ -52,7 +52,7 @@ Quand on aspire la poule, il faut désactiver le `Floating Pawn Movement` et act
 
 J'ai construit une vraie petite **machine à états** avec deux variables booléennes (`PhysicIsActive` / `PhysicLastActive`) comparées dans l'`Event Tick`, avec un `AND` et un `Delay`. Les transitions sont gérées via deux Custom Events.
 
-C'est le truc dont je suis le plus fier de la semaine — j'ai raisonné comme un dev qui pense aux cas limites, pas juste "faire marcher pour le cas nominal".
+C'est le truc dont je suis le plus fier du jalon — j'ai raisonné comme un dev qui pense aux cas limites, pas juste "faire marcher pour le cas nominal".
 
 <video src="/image/Egg_Ranch_S4_Chicken_Suck_Release.mp4" autoplay loop muted playsinline width="800"></video>
 
@@ -79,7 +79,7 @@ Fix : sur le `Spawn Actor From Class`, mettre `Collision Handling Override = Alw
 
 ### Préparé pour plus tard
 
-J'ai posé d'avance les variables `bHasEaten` et `EggLayDelay` : la poule ne pondra que quand elle aura mangé. Le branchement avec le grain attend la S5. J'ai aussi posé `GroundCheckDistance` pour la détection du sol via Line Trace vertical. C'est plus propre de poser ces variables au moment où la logique alentour est fraîche dans la tête.
+J'ai posé d'avance les variables `bHasEaten` et `EggLayDelay` : la poule ne pondra que quand elle aura mangé. Le branchement avec le grain attend le J5. J'ai aussi posé `GroundCheckDistance` pour la détection du sol via Line Trace vertical. C'est plus propre de poser ces variables au moment où la logique alentour est fraîche dans la tête.
 
 ---
 
@@ -87,7 +87,7 @@ J'ai posé d'avance les variables `bHasEaten` et `EggLayDelay` : la poule ne pon
 
 ### Pourquoi je l'ai fait
 
-L'ancien inventaire de la S3 (un simple `Array of Class Reference` + un compteur texte) ne permettait pas de **choisir** quel type d'objet relâcher. Or pour la suite (nourrir les poules avec le bon grain, vendre les bons œufs), il FAUT pouvoir sélectionner un type précis.
+L'ancien inventaire du J3 (un simple `Array of Class Reference` + un compteur texte) ne permettait pas de **choisir** quel type d'objet relâcher. Or pour la suite (nourrir les poules avec le bon grain, vendre les bons œufs), il FAUT pouvoir sélectionner un type précis.
 
 J'ai donc tout refait en système à slots, exactement comme le **vacpack de Slime Rancher**. Pas au planning, mais devenu évident en jouant 30 secondes au prototype.
 
@@ -165,7 +165,7 @@ Côté logique : fonctions `UpdateSlot` (par slot : met à jour la quantité, le
 
 ---
 
-## Les "ah ouais d'accord" globaux de la semaine
+## Les "ah ouais d'accord" globaux du jalon
 
 - **Pawn vs Character** : Add Force ne marche pas sur un Character.
 - **Nodes Latent interdits dans les fonctions** → Custom Events obligatoires pour `AI Move To`, `Delay`, etc.
@@ -177,22 +177,22 @@ Côté logique : fonctions `UpdateSlot` (par slot : met à jour la quantité, le
 
 ---
 
-## Le fil rouge de la semaine
+## Le fil rouge du jalon
 
 En relisant mes notes, je remarque que **presque toutes mes galères viennent du même type de cause** : un système qui marchait pour un cas simple cassait quand je l'étendais à un cas plus complexe.
 
 - Character qui marchait pour le joueur, mais pas pour les poules.
 - Aspiration qui marchait pour les cubes, mais pas pour les poules.
-- Inventaire S3 qui tenait pour un compteur, mais pas pour un vrai gameplay.
+- Inventaire J3 qui tenait pour un compteur, mais pas pour un vrai gameplay.
 
-À chaque fois, la solution était de **généraliser proprement** plutôt que de bricoler avec des conditions partout. Le `Cast to BP_Chicken` pour filtrer le type, la machine à états pour gérer les transitions, le système à slots pour donner du sens à l'inventaire. C'est peut-être LA leçon de la semaine : **quand un truc se met à coincer en l'étendant, c'est que l'abstraction d'origine n'était pas la bonne, pas qu'il faut empiler des `if`**.
+À chaque fois, la solution était de **généraliser proprement** plutôt que de bricoler avec des conditions partout. Le `Cast to BP_Chicken` pour filtrer le type, la machine à états pour gérer les transitions, le système à slots pour donner du sens à l'inventaire. C'est peut-être LA leçon du jalon : **quand un truc se met à coincer en l'étendant, c'est que l'abstraction d'origine n'était pas la bonne, pas qu'il faut empiler des `if`**.
 
 ---
 
-## État à la fin de la semaine
+## État à la fin du jalon
 
 - Des poules autonomes qui se baladent sur le Nav Mesh, se laissent aspirer proprement, pondent des œufs (aspirables comme le reste).
 - Un système d'inventaire à slots fonctionnel de bout en bout : ramasser, trier par type, sélectionner avec molette / touches / manette, relâcher du slot actif, rejet visuel quand c'est plein, UI lisible.
-- Toujours **~2-3 semaines d'avance** sur le planning officiel.
+- Toujours **~2-3 jalons d'avance** sur le planning officiel.
 
-La prochaine étape, c'est la **S5** : le **grain** et le **système de faim** des poules. C'est la semaine que je m'étais juré de ne pas rater, donc je l'attaque avec une marge confortable et de la sérénité.
+La prochaine étape, c'est le **J5** : le **grain** et le **système de faim** des poules. C'est le jalon que je m'étais juré de ne pas rater, donc je l'attaque avec une marge confortable et de la sérénité.

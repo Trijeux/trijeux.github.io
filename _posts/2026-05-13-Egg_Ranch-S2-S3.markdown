@@ -1,14 +1,14 @@
 ---
 layout: post
-title:  "Egg Ranch — Semaines 2 & 3 : L'aspirateur"
+title:  "Egg Ranch — Jalons 2 & 3 : L'aspirateur"
 date:   2026-05-13 22:00:00 +0200
 categories: Blog_Post Unreal_Engine Egg_Ranch
 hidden : true
 ---
 
-Les **semaines 2 et 3** sont normalement deux semaines bien distinctes du planning : la S2 pour construire l'aspirateur, la S3 pour le stockage et l'UI. Sauf que les fondations posées en S1 étaient si propres que j'ai tout enchaîné dans **une seule session de ~6h le mercredi 13 mai** — un jour normalement OFF où j'ai pu dev exceptionnellement. À la fin de la journée, la boucle complète *aspirer → stocker → relâcher* tournait.
+Les **jalons 2 et 3** sont normalement deux jalons bien distincts du planning : le J2 pour construire l'aspirateur, le J3 pour le stockage et l'UI. Sauf que les fondations posées au J1 étaient si propres que j'ai tout enchaîné dans **une seule session de ~6h le mercredi 13 mai** — un jour normalement OFF où j'ai pu dev exceptionnellement. À la fin de la journée, la boucle complète *aspirer → stocker → relâcher* tournait.
 
-Ce devlog est donc le récap des deux semaines combinées.
+Ce devlog est donc le récap des deux jalons combinés.
 
 ---
 
@@ -55,11 +55,11 @@ C'est moins propre qu'une vraie courbe d'attraction, mais largement suffisant po
 
 ---
 
-## 2. Le stockage — version simple S3
+## 2. Le stockage — version simple J3
 
 À l'époque, mon inventaire était volontairement basique : une variable `Inventory` typée **Array of Actor Class Reference**. Quand un objet aspiré arrive assez près (`Vector Length` entre lui et la caméra `< 150`), je fais `Get Class` du Hit Actor → `Add to Inventory` → `Destroy Actor`. L'objet disparaît "absorbé" et seul son TYPE est stocké.
 
-C'était suffisant pour valider la boucle, mais ça ne permettait pas de choisir quel type relâcher. **Ce système sera complètement refait en S4** quand j'aurai besoin de sélectionner (grain à donner à une poule, œufs à vendre). Cf. le devlog S4 et son système à slots.
+C'était suffisant pour valider la boucle, mais ça ne permettait pas de choisir quel type relâcher. **Ce système sera complètement refait au J4** quand j'aurai besoin de sélectionner (grain à donner à une poule, œufs à vendre). Cf. le devlog J4 et son système à slots.
 
 ---
 
@@ -101,7 +101,7 @@ Fonction `UpdateInventoryUI` : construit le texte avec `Append` + `To Text` ("Ob
 
 ---
 
-## 6. Les "ah ouais d'accord" de ces deux semaines
+## 6. Les "ah ouais d'accord" de ces deux jalons
 
 **Simulate Physics est obligatoire** pour qu'un objet réagisse aux forces. La masse influence la chute et les collisions mais **pas l'attraction grâce à `Accel Change`**.
 
@@ -119,15 +119,15 @@ Fonction `UpdateInventoryUI` : construit le texte avec `Append` + `To Text` ("Ob
 
 Plusieurs choses se sont alignées :
 
-- **Les fondations S1 étaient solides.** Enhanced Input bien compris, structure propre, Git en place — zéro friction sur les bases.
+- **Les fondations J1 étaient solides.** Enhanced Input bien compris, structure propre, Git en place — zéro friction sur les bases.
 - **Le concept est simple et systémique.** Raycast → force → tableau → spawn. Pas de modèles, pas d'animations, pas de game design tordu, que de la logique.
 - **Une référence mentale claire.** Je savais exactement ce que je voulais (le vacpack de Slime Rancher), donc zéro temps perdu à hésiter sur le design.
 - **L'élan.** Une fois l'aspirateur qui marche, le stockage et le relâchement réutilisent les mêmes briques (collision, spawn, classes). Tout est venu naturellement.
 
 ---
 
-## 8. État après ces deux semaines
+## 8. État après ces deux jalons
 
-La boucle **aspirer → stocker → relâcher** fonctionne de bout en bout. On peut viser un cube, le faire venir, le ranger dans un inventaire qui affiche son contenu, puis le relâcher devant soi avec un coup d'impulsion. C'est jouable, c'est satisfaisant, et c'est la base sur laquelle vont se brancher les poules, les œufs et le grain dans les semaines suivantes.
+La boucle **aspirer → stocker → relâcher** fonctionne de bout en bout. On peut viser un cube, le faire venir, le ranger dans un inventaire qui affiche son contenu, puis le relâcher devant soi avec un coup d'impulsion. C'est jouable, c'est satisfaisant, et c'est la base sur laquelle vont se brancher les poules, les œufs et le grain dans les jalons suivants.
 
-Et surtout : **2 semaines d'avance sur le planning officiel**. La S4 démarre dans la foulée.
+Et surtout : **2 jalons d'avance sur le planning officiel**. Le J4 démarre dans la foulée.
