@@ -130,3 +130,5 @@ Puis un téléphone classique, en portrait et en paysage :
 Les cartes existent, sans thème figé : des questions communes et propres au thème, des objets qui connaissent leurs réponses, des personnages, des thèmes qui se vérifient et des extensions prêtes pour de futurs packs. Un thème de test complet et un écran d'aperçu testé sur deux vrais téléphones. Prochaine étape, le cœur du jeu : **le moteur de règles et ses tests**.
 
 *Précédent : [Jalon 1 — Un écran qui tient sur tous les téléphones](/blog_post/unity/jeu_de_carte/Jeu_De_Carte-J1.html)*
+
+*Suite : [Jalon 3 — Le moteur de règles, et mes premiers tests](/blog_post/unity/jeu_de_carte/Jeu_De_Carte-J3.html)*

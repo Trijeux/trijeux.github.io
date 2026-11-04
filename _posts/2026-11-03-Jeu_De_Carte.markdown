@@ -28,7 +28,7 @@ Les autres joueurs sont les **Enquêteurs**. Chacun leur tour, ils posent une qu
 
 Sur la table, toutes les **cartes Indice** sont étalées face visible : une par objet possible. Dès qu'un Enquêteur pense avoir trouvé, il prend la carte Indice correspondante. **Premier arrivé, premier servi** : une carte prise n'est plus disponible pour les autres. À la révélation, ceux qui ont vu juste marquent des points, et le Maître aussi s'il a été trouvé.
 
-C'est un jeu court, malin, où il faut à la fois bien déduire et ne pas trop attendre. Le détail complet des règles viendra dans le devlog du jalon où je programme le moteur de règles.
+C'est un jeu court, malin, où il faut à la fois bien déduire et ne pas trop attendre. Le déroulement complet d'un tour est détaillé dans le [devlog du Jalon 3](/blog_post/unity/jeu_de_carte/Jeu_De_Carte-J3.html), celui du moteur de règles.
 
 ---
 
@@ -78,8 +78,8 @@ Le projet est découpé en **jalons**. Chaque jalon se termine obligatoirement p
 |---|---|---|
 | **1** | Projet et écran : Android, PC, pliants, interface de base | ✅ **Terminé** |
 | **2** | Données : cartes, thèmes et extensions | ✅ **Terminé** |
-| **3** | Moteur de règles et tests | 🔄 En cours |
-| **4** | IA | ⏳ À venir |
+| **3** | Moteur de règles et tests | ✅ **Terminé** |
+| **4** | IA | 🔄 En cours |
 | **5** | Écrans de jeu | ⏳ À venir |
 | **6** | Partie complète | ⏳ À venir |
 | **7** | Finitions et installation | ⏳ À venir |
@@ -112,9 +112,10 @@ Le retour d'expérience jalon par jalon : ce que j'ai fait, ce qui m'a fait gal�
 
 - **[Jalon 1 — Un écran qui tient sur tous les téléphones (même pliés)](/blog_post/unity/jeu_de_carte/Jeu_De_Carte-J1.html)** — 02/11/2026
 - **[Jalon 2 — Des cartes sans thème : les données du jeu](/blog_post/unity/jeu_de_carte/Jeu_De_Carte-J2.html)** — 03/11/2026
+- **[Jalon 3 — Le moteur de règles, et mes premiers tests](/blog_post/unity/jeu_de_carte/Jeu_De_Carte-J3.html)** — 04/11/2026
 
 ---
 
 ## Conclusion
 
-Ce projet, c'est un exercice de rigueur : garder des règles intouchables, tout en construisant un jeu assez souple pour changer de thème, d'écran et, un jour, de mode de jeu. Les deux premiers jalons ont posé les fondations (l'écran et les données). Le prochain, c'est le cœur : **le moteur de règles**, avec ses tests. **À suivre !**
+Ce projet, c'est un exercice de rigueur : garder des règles intouchables, tout en construisant un jeu assez souple pour changer de thème, d'écran et, un jour, de mode de jeu. Les trois premiers jalons ont posé les fondations : l'écran, les données, puis le cœur du jeu, **le moteur de règles** et ses tests. Le prochain, ce sont **les IA**, pour pouvoir enfin jouer contre quelqu'un. **À suivre !**
