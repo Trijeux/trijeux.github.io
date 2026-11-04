@@ -52,7 +52,7 @@ Du petit téléphone au pliant déplié, jusqu'à la fenêtre PC, toutes les car
 - **Android** : tous les téléphones courants, y compris les **pliants**. Mon téléphone est un Galaxy Z Fold8, donc chaque jalon est testé dessus, plié et déplié, et sur un téléphone classique.
 - **PC (Windows)** : en fenêtre redimensionnable.
 
-Le mode de jeu, pour commencer : **en solo contre des IA**. Le multijoueur viendra plus tard, et le projet est découpé dès le départ pour pouvoir l'ajouter sans tout réécrire.
+Le mode de jeu, pour commencer : **en solo contre des IA**. Le multijoueur en ligne viendra plus tard, avec **Android et PC dans la même partie**, et le projet est découpé dès le départ pour pouvoir l'ajouter sans tout réécrire.
 
 ---
 
@@ -79,11 +79,15 @@ Le projet est découpé en **jalons**. Chaque jalon se termine obligatoirement p
 | **1** | Projet et écran : Android, PC, pliants, interface de base | ✅ **Terminé** |
 | **2** | Données : cartes, thèmes et extensions | ✅ **Terminé** |
 | **3** | Moteur de règles et tests | ✅ **Terminé** |
-| **4** | IA | 🔄 En cours |
-| **5** | Écrans de jeu | ⏳ À venir |
+| **4** | IA | ✅ **Terminé** |
+| **5** | Écrans de jeu | 🔄 En cours |
 | **6** | Partie complète | ⏳ À venir |
-| **7** | Finitions et installation | ⏳ À venir |
-| **8** | Multijoueur | 💤 Plus tard |
+| **7** | Thème de test complet (pour tester sur téléphone, jamais publié) | ⏳ À venir |
+| **8** | Extensions de thème : activation et désactivation | ⏳ À venir |
+| **9** | Premier vrai thème : fantasy, avec ses extensions | ⏳ À venir |
+| **10** | Game feel : feedback et animations | ⏳ À venir |
+| **11** | Finitions et installation | ⏳ À venir |
+| **12** | Multijoueur en ligne | 💤 Plus tard |
 
 ---
 
@@ -113,9 +117,10 @@ Le retour d'expérience jalon par jalon : ce que j'ai fait, ce qui m'a fait gal�
 - **[Jalon 1 — Un écran qui tient sur tous les téléphones (même pliés)](/blog_post/unity/jeu_de_carte/Jeu_De_Carte-J1.html)** — 02/11/2026
 - **[Jalon 2 — Des cartes sans thème : les données du jeu](/blog_post/unity/jeu_de_carte/Jeu_De_Carte-J2.html)** — 03/11/2026
 - **[Jalon 3 — Le moteur de règles, et mes premiers tests](/blog_post/unity/jeu_de_carte/Jeu_De_Carte-J3.html)** — 04/11/2026
+- **[Jalon 4 — Des IA qui jouent sans tricher](/blog_post/unity/jeu_de_carte/Jeu_De_Carte-J4.html)** — 04/11/2026
 
 ---
 
 ## Conclusion
 
-Ce projet, c'est un exercice de rigueur : garder des règles intouchables, tout en construisant un jeu assez souple pour changer de thème, d'écran et, un jour, de mode de jeu. Les trois premiers jalons ont posé les fondations : l'écran, les données, puis le cœur du jeu, **le moteur de règles** et ses tests. Le prochain, ce sont **les IA**, pour pouvoir enfin jouer contre quelqu'un. **À suivre !**
+Ce projet, c'est un exercice de rigueur : garder des règles intouchables, tout en construisant un jeu assez souple pour changer de thème, d'écran et, un jour, de mode de jeu. Les quatre premiers jalons ont posé les fondations : l'écran, les données, le cœur du jeu (**le moteur de règles** et ses tests), puis **des IA** qui jouent sans tricher. Le prochain, ce sont **les écrans de jeu**, pour enfin voir les cartes sur la table. **À suivre !**

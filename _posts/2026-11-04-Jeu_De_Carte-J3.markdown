@@ -104,3 +104,5 @@ Pas d'écran de jeu, pas d'IA : le moteur ne fait qu'appliquer les règles, et l
 Un moteur de règles complet, indépendant d'Unity, qui applique la notice du début à la fin de la partie, avec ses décisions documentées là où la notice se tait. 64 tests au vert, et 120 parties simulées qui donnent exactement le même résultat dans l'éditeur et sur deux vrais téléphones. Prochaine étape : **les IA**.
 
 *Précédent : [Jalon 2 — Des cartes sans thème](/blog_post/unity/jeu_de_carte/Jeu_De_Carte-J2.html)*
+
+*Suite : [Jalon 4 — Des IA qui jouent sans tricher](/blog_post/unity/jeu_de_carte/Jeu_De_Carte-J4.html)*
